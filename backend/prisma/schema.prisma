@@ -1,0 +1,323 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum Role {
+  USER
+  ADMIN
+  SELLER
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+model User {
+  id            String    @id @default(uuid())
+  name          String?
+  email         String    @unique
+  password      String
+  image         String?
+  role          Role      @default(USER)
+  isActive      Boolean   @default(true)
+  
+  addresses     Address[]
+  phones        Phone[]
+  reviews       Review[]
+  orders        Order[]
+  cart          Cart?
+  wishlist      Wishlist?
+  chatbotLogs   ChatBot[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model Address {
+  id            String    @id @default(uuid())
+  street        String
+  number        String
+  complement    String?
+  neighborhood  String
+  city          String
+  state         String
+  country       String    @default("Brasil")
+  zipCode       String
+  isDefault     Boolean   @default(false)
+  
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("addresses")
+}
+
+model Phone {
+  id            String    @id @default(uuid())
+  ddi           String    @default("55")
+  ddd           String
+  number        String
+  
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("phones")
+}
+
+model Product {
+  id                  String         @id @default(uuid())
+  name                String
+  slug                String         @unique
+  description         String
+  price               Float
+  discountPrice       Float?
+  stock               Int            @default(0)
+  sku                 String         @unique
+  
+  // Physical attributes
+  weight              Float?         // in kg
+  height              Float?         // in cm
+  width               Float?         // in cm
+  length              Float?         // in cm
+  color               String?
+  
+  // Relations
+  categoryId          String
+  category            Category       @relation(fields: [categoryId], references: [id])
+  
+  brandId             String?
+  brand               Brand?         @relation(fields: [brandId], references: [id])
+  
+  images              ProductImage[]
+  reviews             Review[]
+  orderItems          OrderItem[]
+  cartItems           CartItem[]
+  wishlistItems       WishlistItem[]
+  
+  // Hazardous/Special materials (from original schema)
+  materialId          String?
+  material            Material?      @relation(fields: [materialId], references: [id])
+  riskId              String?
+  risk                Risk?          @relation(fields: [riskId], references: [id])
+
+  isActive            Boolean        @default(true)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  @@map("products")
+}
+
+model ProductImage {
+  id        String   @id @default(uuid())
+  url       String
+  isMain    Boolean  @default(false)
+  
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
+}
+
+model Category {
+  id          String     @id @default(uuid())
+  name        String
+  slug        String     @unique
+  imageUrl    String?
+  
+  parentId    String?
+  parent      Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryToCategory")
+  
+  products    Product[]
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("categories")
+}
+
+model Brand {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  logoUrl     String?
+  
+  products    Product[]
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("brands")
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  rating    Int      // 1 to 5
+  comment   String?
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("reviews")
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  items     CartItem[]
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  quantity  Int      @default(1)
+  
+  cartId    String
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@unique([cartId, productId])
+  @@map("cart_items")
+}
+
+model Order {
+  id              String        @id @default(uuid())
+  orderNumber     String        @unique // e.g., ORD-123456
+  
+  totalAmount     Float
+  status          OrderStatus   @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+  paymentMethod   String?       // e.g., CREDIT_CARD, PIX, BOLETO
+  
+  shippingAddress String        // Snapshot of address at time of order
+  
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+  
+  items           OrderItem[]
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  quantity  Int
+  price     Float    // Price at the time of purchase
+  
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+model Wishlist {
+  id        String         @id @default(uuid())
+  userId    String         @unique
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  items     WishlistItem[]
+
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@map("wishlists")
+}
+
+model WishlistItem {
+  id         String   @id @default(uuid())
+  
+  wishlistId String
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id])
+
+  @@unique([wishlistId, productId])
+  @@map("wishlist_items")
+}
+
+model Material {
+  id        String    @id @default(uuid())
+  name      String
+  type      String?
+  imageUrl  String?
+  
+  products  Product[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("materials")
+}
+
+model Risk {
+  id              String    @id @default(uuid())
+  name            String
+  description     String?
+  riskForPeople   String?
+  riskForProduct  String?
+  
+  products        Product[]
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("risks")
+}
+
+model ChatBot {
+  id        String   @id @default(uuid())
+  query     String
+  response  String
+  
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@map("chatbot_logs")
+}

@@ -1,0 +1,536 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Address {
+  city: String!
+  complement: String
+  country: String!
+  createdAt: DateTime!
+  id: ID!
+  isDefault: Boolean!
+  neighborhood: String!
+  number: String!
+  state: String!
+  street: String!
+  updatedAt: DateTime!
+  user: User!
+  userId: String!
+  zipCode: String!
+}
+
+type Auth {
+  accessToken: String!
+  user: User!
+}
+
+type Brand {
+  createdAt: DateTime!
+  id: ID!
+  logoUrl: String
+  name: String!
+  products: [Product]!
+  updatedAt: DateTime!
+}
+
+type Cart {
+  createdAt: DateTime!
+  id: ID!
+  items: [CartItem]!
+  updatedAt: DateTime!
+  user: User!
+  userId: String!
+}
+
+type CartItem {
+  cart: Cart!
+  cartId: String!
+  id: ID!
+  product: Product!
+  productId: String!
+  quantity: Int!
+}
+
+type Category {
+  children: [Category]!
+  createdAt: DateTime!
+  id: ID!
+  imageUrl: String
+  name: String!
+  parent: Category
+  parentId: String
+  products: [Product]!
+  slug: String!
+  updatedAt: DateTime!
+}
+
+type Chatbot {
+  createdAt: DateTime!
+  id: ID!
+  query: String!
+  response: String!
+  user: User
+  userId: String
+}
+
+input CreateAddressInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateAuthInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateBrandInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateCartInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateCartItemInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateCategoryInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateChatbotInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateMaterialInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateOrderInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateOrderItemInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreatePhoneInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateProductImageInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateProductInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateReviewInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateRiskInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateUserInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateWishlistInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateWishlistItemInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Material {
+  createdAt: DateTime!
+  id: ID!
+  imageUrl: String
+  name: String!
+  products: [Product]!
+  type: String
+  updatedAt: DateTime!
+}
+
+type Mutation {
+  createAddress(createAddressInput: CreateAddressInput!): Address!
+  createAuth(createAuthInput: CreateAuthInput!): Auth!
+  createBrand(createBrandInput: CreateBrandInput!): Brand!
+  createCart(createCartInput: CreateCartInput!): Cart!
+  createCartItem(createCartItemInput: CreateCartItemInput!): CartItem!
+  createCategory(createCategoryInput: CreateCategoryInput!): Category!
+  createChatbot(createChatbotInput: CreateChatbotInput!): Chatbot!
+  createMaterial(createMaterialInput: CreateMaterialInput!): Material!
+  createOrder(createOrderInput: CreateOrderInput!): Order!
+  createOrderItem(createOrderItemInput: CreateOrderItemInput!): OrderItem!
+  createPhone(createPhoneInput: CreatePhoneInput!): Phone!
+  createProduct(createProductInput: CreateProductInput!): Product!
+  createProductImage(createProductImageInput: CreateProductImageInput!): ProductImage!
+  createReview(createReviewInput: CreateReviewInput!): Review!
+  createRisk(createRiskInput: CreateRiskInput!): Risk!
+  createUser(createUserInput: CreateUserInput!): User!
+  createWishlist(createWishlistInput: CreateWishlistInput!): Wishlist!
+  createWishlistItem(createWishlistItemInput: CreateWishlistItemInput!): WishlistItem!
+  removeAddress(id: Int!): Address!
+  removeAuth(id: Int!): Auth!
+  removeBrand(id: Int!): Brand!
+  removeCart(id: Int!): Cart!
+  removeCartItem(id: Int!): CartItem!
+  removeCategory(id: Int!): Category!
+  removeChatbot(id: Int!): Chatbot!
+  removeMaterial(id: Int!): Material!
+  removeOrder(id: Int!): Order!
+  removeOrderItem(id: Int!): OrderItem!
+  removePhone(id: Int!): Phone!
+  removeProduct(id: Int!): Product!
+  removeProductImage(id: Int!): ProductImage!
+  removeReview(id: Int!): Review!
+  removeRisk(id: Int!): Risk!
+  removeUser(id: Int!): User!
+  removeWishlist(id: Int!): Wishlist!
+  removeWishlistItem(id: Int!): WishlistItem!
+  updateAddress(updateAddressInput: UpdateAddressInput!): Address!
+  updateAuth(updateAuthInput: UpdateAuthInput!): Auth!
+  updateBrand(updateBrandInput: UpdateBrandInput!): Brand!
+  updateCart(updateCartInput: UpdateCartInput!): Cart!
+  updateCartItem(updateCartItemInput: UpdateCartItemInput!): CartItem!
+  updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
+  updateChatbot(updateChatbotInput: UpdateChatbotInput!): Chatbot!
+  updateMaterial(updateMaterialInput: UpdateMaterialInput!): Material!
+  updateOrder(updateOrderInput: UpdateOrderInput!): Order!
+  updateOrderItem(updateOrderItemInput: UpdateOrderItemInput!): OrderItem!
+  updatePhone(updatePhoneInput: UpdatePhoneInput!): Phone!
+  updateProduct(updateProductInput: UpdateProductInput!): Product!
+  updateProductImage(updateProductImageInput: UpdateProductImageInput!): ProductImage!
+  updateReview(updateReviewInput: UpdateReviewInput!): Review!
+  updateRisk(updateRiskInput: UpdateRiskInput!): Risk!
+  updateUser(updateUserInput: UpdateUserInput!): User!
+  updateWishlist(updateWishlistInput: UpdateWishlistInput!): Wishlist!
+  updateWishlistItem(updateWishlistItemInput: UpdateWishlistItemInput!): WishlistItem!
+}
+
+type Order {
+  createdAt: DateTime!
+  id: ID!
+  items: [OrderItem]!
+  orderNumber: String!
+  paymentMethod: String
+  paymentStatus: PaymentStatus!
+  shippingAddress: String!
+  status: OrderStatus!
+  totalAmount: Float!
+  updatedAt: DateTime!
+  user: User!
+  userId: String!
+}
+
+type OrderItem {
+  id: ID!
+  order: Order!
+  orderId: String!
+  price: Float!
+  product: Product!
+  productId: String!
+  quantity: Int!
+}
+
+enum OrderStatus {
+  CANCELLED
+  DELIVERED
+  PENDING
+  PROCESSING
+  SHIPPED
+}
+
+enum PaymentStatus {
+  COMPLETED
+  FAILED
+  PENDING
+  REFUNDED
+}
+
+type Phone {
+  createdAt: DateTime!
+  ddd: String!
+  ddi: String!
+  id: ID!
+  number: String!
+  updatedAt: DateTime!
+  user: User!
+  userId: String!
+}
+
+type Product {
+  brand: Brand
+  brandId: String
+  cartItems: [CartItem]!
+  category: Category!
+  categoryId: String!
+  color: String
+  createdAt: DateTime!
+  description: String!
+  discountPrice: Float
+  height: Float
+  id: ID!
+  images: [ProductImage]!
+  isActive: Boolean!
+  length: Float
+  material: Material
+  materialId: String
+  name: String!
+  orderItems: [OrderItem]!
+  price: Float!
+  reviews: [Review]!
+  risk: Risk
+  riskId: String
+  sku: String!
+  slug: String!
+  stock: Int!
+  updatedAt: DateTime!
+  weight: Float
+  width: Float
+  wishlistItems: [WishlistItem]!
+}
+
+type ProductImage {
+  id: ID!
+  isMain: Boolean!
+  product: Product!
+  productId: String!
+  url: String!
+}
+
+type Query {
+  address(id: Int!): Address!
+  addresses: [Address!]!
+  auth(id: Int!): Auth!
+  brand(id: Int!): Brand!
+  brands: [Brand!]!
+  cart(id: Int!): Cart!
+  cartItem(id: Int!): CartItem!
+  cartItems: [CartItem!]!
+  carts: [Cart!]!
+  categories: [Category!]!
+  category(id: Int!): Category!
+  chatbot(id: Int!): Chatbot!
+  material(id: Int!): Material!
+  materials: [Material!]!
+  order(id: Int!): Order!
+  orderItem(id: Int!): OrderItem!
+  orderItems: [OrderItem!]!
+  orders: [Order!]!
+  phone(id: Int!): Phone!
+  phones: [Phone!]!
+  product(id: Int!): Product!
+  productImage(id: Int!): ProductImage!
+  productImages: [ProductImage!]!
+  products: [Product!]!
+  review(id: Int!): Review!
+  reviews: [Review!]!
+  risk(id: Int!): Risk!
+  risks: [Risk!]!
+  user(id: Int!): User!
+  users: [User!]!
+  wishlist(id: Int!): Wishlist!
+  wishlistItem(id: Int!): WishlistItem!
+  wishlistItems: [WishlistItem!]!
+  wishlists: [Wishlist!]!
+}
+
+type Review {
+  comment: String
+  createdAt: DateTime!
+  id: ID!
+  product: Product!
+  productId: String!
+  rating: Int!
+  updatedAt: DateTime!
+  user: User!
+  userId: String!
+}
+
+type Risk {
+  createdAt: DateTime!
+  description: String
+  id: ID!
+  name: String!
+  products: [Product]!
+  riskForPeople: String
+  riskForProduct: String
+  updatedAt: DateTime!
+}
+
+enum Role {
+  ADMIN
+  SELLER
+  USER
+}
+
+input UpdateAddressInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateAuthInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateBrandInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateCartInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateCartItemInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateCategoryInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateChatbotInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateMaterialInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateOrderInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateOrderItemInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdatePhoneInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateProductImageInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateProductInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateReviewInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateRiskInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateUserInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateWishlistInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateWishlistItemInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+type User {
+  addresses: [Address]!
+  cart: Cart
+  chatbotLogs: [Chatbot]!
+  createdAt: DateTime!
+  email: String!
+  id: ID!
+  image: String
+  isActive: Boolean!
+  name: String
+  orders: [Order]!
+  phones: [Phone]!
+  reviews: [Review]!
+  role: Role!
+  updatedAt: DateTime!
+  wishlist: Wishlist
+}
+
+type Wishlist {
+  createdAt: DateTime!
+  id: ID!
+  items: [WishlistItem]!
+  updatedAt: DateTime!
+  user: User!
+  userId: String!
+}
+
+type WishlistItem {
+  id: ID!
+  product: Product!
+  productId: String!
+  wishlist: Wishlist!
+  wishlistId: String!
+}
