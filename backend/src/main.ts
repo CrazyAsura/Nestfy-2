@@ -8,7 +8,14 @@ async function bootstrap() {
 
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
   app.enableCors({
-    origin: [frontendUrl, 'https://nestfy-1-next.vercel.app'], // Adicione sua URL da Vercel aqui
+    origin: (origin, callback) => {
+      const allowedOrigins = [frontendUrl, 'https://nestfy-1-next.vercel.app'];
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
