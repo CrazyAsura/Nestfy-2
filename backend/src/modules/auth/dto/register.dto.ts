@@ -1,8 +1,6 @@
-import { Injectable } from "@nestjs/common";
 import { Role, UserType } from "@prisma/client";
 import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from "class-validator";
 
-@Injectable()
 export class RegisterDto {
     @IsString({ message: 'O nome deve ser uma string' })
     @IsNotEmpty({ message: 'O nome é obrigatório' })

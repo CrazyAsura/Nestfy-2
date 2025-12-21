@@ -1,11 +1,7 @@
-import { Injectable } from "@nestjs/common";
 import { IsEmail } from "class-validator";
-
 import { IsNotEmpty } from "class-validator";
-
 import { MinLength } from "class-validator";
 
-@Injectable()
 export class LoginDto {
     @IsEmail({}, { message: 'Email inválido' })
     @IsNotEmpty({ message: 'O email é obrigatório' })

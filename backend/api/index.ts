@@ -13,8 +13,9 @@ export const bootstrap = async (expressInstance: express.Express) => {
     new ExpressAdapter(expressInstance),
   );
 
+  const frontendUrl = process.env.FRONTEND_URL || '*';
   app.enableCors({
-    origin: '*', // Ajuste conforme necessário em produção
+    origin: frontendUrl, // Ajuste conforme necessário em produção
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
