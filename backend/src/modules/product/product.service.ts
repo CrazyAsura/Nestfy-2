@@ -31,14 +31,14 @@ export class ProductService {
         sku,
         category: {
           connect: {
-            id: String(createProductDto.categoryId),
+            id: createProductDto.categoryId,
           },
         },
         images: {
-          create: createProductDto.ProductImage ? {
-            url: createProductDto.ProductImage.url,
-            isMain: true,
-          } : undefined,
+          create: createProductDto.images ? createProductDto.images.map(img => ({
+            url: img.url,
+            isMain: img.isMain || false,
+          })) : undefined,
         },
       },
       include: {
@@ -98,24 +98,22 @@ export class ProductService {
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
-    await this.prisma.product.findUnique({
-      where: { id },
-    });
+    await this.findOne(id);
 
-    const { categoryId, ProductImage, ...data } = updateProductDto;
+    const { categoryId, images, ...data } = updateProductDto;
 
     return this.prisma.product.update({
       where: { id },
       data: {
         ...data,
         category: categoryId ? {
-          connect: { id: String(categoryId) }
+          connect: { id: categoryId }
         } : undefined,
-        images: ProductImage ? {
-          create: {
-            url: ProductImage.url,
-            isMain: true
-          }
+        images: images ? {
+          create: images.map(img => ({
+            url: img.url,
+            isMain: img.isMain || false,
+          }))
         } : undefined
       },
       include: {
