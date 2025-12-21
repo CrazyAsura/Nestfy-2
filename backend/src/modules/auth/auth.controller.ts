@@ -12,7 +12,7 @@ import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import type { Request } from 'express';
-import type { User } from '@prisma/client';
+import { User } from '../../generated/prisma-client';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 @Controller('auth')

@@ -5,8 +5,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { RegisterDto } from './dto/register.dto';
-import { User } from '@prisma/client';
-import { Role, UserType } from '../../constants/enums';
+import { User, Role, UserType } from '../../generated/prisma-client';
 import { LoginDto } from './dto/login.dto';
 
 import { ResetPasswordDto } from './dto/reset-password.dto';

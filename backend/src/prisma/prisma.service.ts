@@ -1,25 +1,18 @@
 import { Injectable, OnModuleInit, OnModuleDestroy, INestApplication } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
-import { PrismaLibSql } from '@prisma/adapter-libsql';
+import { PrismaClient } from '../generated/prisma-client';
+import { withAccelerate } from '@prisma/extension-accelerate';
 import 'dotenv/config';
-import * as path from 'path';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+  private prismaExtended: any;
+
   constructor() {
-    const dbPath = process.env.DATABASE_URL 
-      ? process.env.DATABASE_URL 
-      : `file:${path.join(process.cwd(), 'dev.db')}`;
-
-    const config = {
-      url: dbPath,
-    };
-    const adapter = new PrismaLibSql(config);
-
     super({
-      adapter,
+      accelerateUrl: process.env.PRISMA_DATABASE_URL,
       log: ['error', 'warn'],
     });
+    this.prismaExtended = (this as any).$extends(withAccelerate());
   }
 
   async onModuleInit() {
@@ -28,6 +21,10 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
   async onModuleDestroy() {
     await this.$disconnect();
+  }
+
+  get client() {
+    return this.prismaExtended;
   }
 
   async enableShutdownHooks(app: INestApplication) {
