@@ -1,6 +1,10 @@
 {
-  "dependencies": {
-    "@emotion/cache": "^11.14.0",
-    "@mui/material-nextjs": "^7.3.6"
+  "name": "projeto-1-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "npm run start:prod --prefix backend",
+    "build": "npm run build --prefix backend",
+    "postinstall": "npm install --prefix backend"
   }
 }
