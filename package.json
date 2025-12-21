@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node backend/dist/main.js",
+    "start": "node backend/dist/src/main.js",
     "build": "npm run build --prefix backend",
     "postinstall": "npm install --prefix backend"
   }
