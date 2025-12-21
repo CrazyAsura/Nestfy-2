@@ -1,5 +1,5 @@
-import { Role, UserType } from "@prisma/client";
 import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from "class-validator";
+import { Role, UserType } from "../../../constants/enums";
 
 export class RegisterDto {
     @IsString({ message: 'O nome deve ser uma string' })
