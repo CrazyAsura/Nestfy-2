@@ -2,12 +2,17 @@ import { Injectable, OnModuleInit, OnModuleDestroy, INestApplication } from '@ne
 import { PrismaClient } from '@prisma/client';
 import { PrismaLibSql } from '@prisma/adapter-libsql';
 import 'dotenv/config';
+import * as path from 'path';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   constructor() {
+    const dbPath = process.env.DATABASE_URL 
+      ? process.env.DATABASE_URL 
+      : `file:${path.join(process.cwd(), 'dev.db')}`;
+
     const config = {
-      url: process.env.DATABASE_URL || 'file:./dev.db',
+      url: dbPath,
     };
     const adapter = new PrismaLibSql(config);
 
