@@ -1,8 +1,22 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthResolver } from './auth.resolver';
+import { AuthController } from './auth.controller';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from './jwt.strategy';
 
 @Module({
-  providers: [AuthResolver, AuthService],
+  imports: [
+    PassportModule,
+    JwtModule.register({
+      secret: process.env.JWT_SECRET || 'mudar_depois_para_algo_seguro',
+      signOptions: { 
+        expiresIn: (process.env.JWT_EXPIRES_IN as any) || '7d' 
+      },
+    }),
+  ],
+  controllers: [AuthController],
+  providers: [AuthService, JwtStrategy],
+  exports: [AuthService],
 })
 export class AuthModule {}
