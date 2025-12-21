@@ -1,18 +1,16 @@
 import { Injectable, OnModuleInit, OnModuleDestroy, INestApplication } from '@nestjs/common';
 import { PrismaClient } from '../generated/prisma-client';
-import { withAccelerate } from '@prisma/extension-accelerate';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
 import 'dotenv/config';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
-  private prismaExtended: any;
-
   constructor() {
-    super({
-      accelerateUrl: process.env.PRISMA_DATABASE_URL,
-      log: ['error', 'warn'],
-    });
-    this.prismaExtended = (this as any).$extends(withAccelerate());
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    const adapter = new PrismaPg(pool);
+
+    super({ adapter });
   }
 
   async onModuleInit() {
@@ -24,12 +22,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   }
 
   get client() {
-    return this.prismaExtended;
+    return this;
   }
 
   async enableShutdownHooks(app: INestApplication) {
-    (this as any).$on('beforeExit', async () => {
-      await app.close();
-    });
+    // Nota: hooks de 'beforeExit' podem variar com adaptadores no Prisma 7,
+    // o NestJS gerencia o fechamento do módulo via OnModuleDestroy.
   }
 }
