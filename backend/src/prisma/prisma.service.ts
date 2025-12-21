@@ -5,7 +5,9 @@ import 'dotenv/config';
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   constructor() {
-    super();
+    super({
+      log: ['error', 'warn'],
+    });
   }
 
   async onModuleInit() {
@@ -14,5 +16,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
   async onModuleDestroy() {
     await this.$disconnect();
+  }
+
+  async enableShutdownHooks() {
+    this.$on('beforeExit' as any, async () => {
+      await this.$disconnect();
+    });
   }
 }
