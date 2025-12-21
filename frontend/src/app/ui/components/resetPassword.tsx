@@ -59,15 +59,13 @@ export default function ResetPasswordForm() {
                 router.push('/login');
             },
             onError: (error: any) => {
-                console.error('Erro detalhado na redefinição de senha:', {
-                    status: error?.response?.status,
-                    data: error?.response?.data,
-                    message: error.message,
-                    headers: error?.response?.headers
-                });
+                console.error('Erro completo na redefinição de senha:', error);
+                if (error.response) {
+                    console.error('Dados do erro:', error.response.data);
+                    console.error('Status do erro:', error.response.status);
+                }
                 const errorMessage = error?.response?.data?.message || error.message || 'Erro ao redefinir senha';
                 setSubmitError(errorMessage);
-                console.error('Mensagem de erro amigável:', errorMessage);
             }
         });
     };

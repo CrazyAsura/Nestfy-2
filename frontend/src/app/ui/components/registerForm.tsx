@@ -179,15 +179,13 @@ export default function RegisterForm () {
                 router.push('/login');
             },
             onError: (error: any) => {
-                console.error('Erro detalhado no registro:', {
-                    status: error?.response?.status,
-                    data: error?.response?.data,
-                    message: error.message,
-                    headers: error?.response?.headers
-                });
+                console.error('Erro completo no registro:', error);
+                if (error.response) {
+                    console.error('Dados do erro:', error.response.data);
+                    console.error('Status do erro:', error.response.status);
+                }
                 const errorMessage = error?.response?.data?.message || error.message || 'Erro ao realizar registro';
                 setSubmitError(errorMessage);
-                console.error('Mensagem de erro amigável:', errorMessage);
             }
         })
     }
