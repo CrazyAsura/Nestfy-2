@@ -1,6 +1,6 @@
-import axios from 'axios';
 import { LoginFormData } from '../../schema/login.schema';
 import { ResetPasswordFormData } from '../../schema/resetPassword.schema';
+import { Profile } from '../../types/profile';
 import { api } from './axios';
 
 
@@ -28,8 +28,13 @@ export async function loginRequest(data: LoginFormData) {
     return response.data;
 }
 
-export async function getProfileRequest() {
-    const response = await api.get('/auth/profile');
+export async function getProfileRequest(): Promise<Profile> {
+    const response = await api.get<Profile>('/auth/profile');
+    return response.data;
+}
+
+export async function updateProfileRequest(data: FormData | any): Promise<Profile> {
+    const response = await api.patch<Profile>('/auth/profile', data);
     return response.data;
 }
 

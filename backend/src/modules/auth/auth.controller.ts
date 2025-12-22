@@ -2,62 +2,73 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Body,
   UseGuards,
-  Req,
+  UseInterceptors,
+  UploadedFile,
+  HttpCode,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import type { Request } from 'express';
-import { User } from '../../generated/prisma-client';
+import * as Prisma from '@prisma/client';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { UserType } from '../../constants/enums';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // 🔐 Perfil (JWT)
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Req() req: Request) {
-    return this.authService.getProfile(req.user as User);
+  getProfile(@CurrentUser() user: Prisma.User) {
+    return this.authService.getProfile(user);
   }
 
-  // 👤 Registro Pessoa Física
+  @UseGuards(JwtAuthGuard)
+  @Patch('profile')
+  @UseInterceptors(FileInterceptor('image'))
+  async updateProfile(
+    @CurrentUser() user: Prisma.User,
+    @Body() updateDto: UpdateProfileDto,
+    @UploadedFile() image?: Express.Multer.File
+  ) {
+    return this.authService.updateProfile(user, { ...updateDto, imageFile: image });
+  }
+
   @Post('register/pf')
   registerPF(@Body() registerDto: RegisterDto) {
-    return this.authService.registerPF(registerDto);
+    return this.authService.register(registerDto, UserType.INDIVIDUAL);
   }
 
-  // 🏢 Registro Pessoa Jurídica
   @Post('register/pj')
   registerPJ(@Body() registerDto: RegisterDto) {
-    return this.authService.registerPJ(registerDto);
+    return this.authService.register(registerDto, UserType.LEGAL_ENTITY);
   }
 
-  // 🔑 Login
   @Post('login')
+  @HttpCode(200)
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
 
-  // 🚪 Logout
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  logout(@Req() req: Request) {
-    return this.authService.logout(req.user as User);
+  logout(@CurrentUser() user: Prisma.User) {
+    return this.authService.logout(user);
   }
 
-  // ♻️ Refresh Token
   @Post('refresh')
   refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.authService.refreshToken(refreshTokenDto.refreshToken);
   }
 
-  // 🔑 Reset Password
   @Post('reset-password')
   resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     return this.authService.resetPassword(resetPasswordDto);

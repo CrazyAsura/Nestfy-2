@@ -33,15 +33,16 @@ export const fetchCitiesByState = async (uf: string): Promise<IBGECity[]> => {
 
 export const fetchCountries = async () => {
   try {
-    const response = await axios.get('https://restcountries.com/v3.1/all?fields=name,idd,flags');
+    const response = await axios.get('https://restcountries.com/v3.1/all?fields=name,idd,flags,cca2');
     return response.data.map((country: any) => ({
       name: country.name.common,
       ddi: country.idd.root + (country.idd.suffixes ? country.idd.suffixes[0] : ''),
-      flag: country.flags.svg
+      flag: country.flags.svg,
+      code: country.cca2
     })).sort((a: any, b: any) => a.name.localeCompare(b.name));
   } catch (error) {
     console.error('Erro ao buscar países:', error);
-    return [{ name: 'Brasil', ddi: '+55', flag: 'https://flagcdn.com/br.svg' }];
+    return [{ name: 'Brasil', ddi: '+55', flag: 'https://flagcdn.com/br.svg', code: 'BR' }];
   }
 };
 

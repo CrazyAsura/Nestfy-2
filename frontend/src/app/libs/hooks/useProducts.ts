@@ -5,7 +5,7 @@ import { fetchProducts } from "../api/services/product.service";
 
 async function fetchProductsCaroussel(): Promise<Product[]> {
     const { data } = await api.get("/products")
-    return data
+    return data.data
 }
 
 export function useProductsCaroussel() {

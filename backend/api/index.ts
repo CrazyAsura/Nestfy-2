@@ -3,7 +3,7 @@ import { AppModule } from '../src/app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ExpressAdapter } from '@nestjs/platform-express';
-import express from 'express';
+import express, { json, urlencoded } from 'express';
 
 const server = express();
 
@@ -12,6 +12,9 @@ export const bootstrap = async (expressInstance: express.Express) => {
     AppModule,
     new ExpressAdapter(expressInstance),
   );
+
+  app.use(json({ limit: '10mb' }));
+  app.use(urlencoded({ extended: true, limit: '10mb' }));
 
   const frontendUrl = process.env.FRONTEND_URL || '*';
   app.enableCors({
