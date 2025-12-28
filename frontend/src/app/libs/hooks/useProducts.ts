@@ -2,9 +2,10 @@ import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { api } from "../api/services/axios";
 import { Product } from "../types/product";
 import { fetchProducts } from "../api/services/product.service";
+import { API_ROUTES } from "../api/routes";
 
 async function fetchProductsCaroussel(): Promise<Product[]> {
-    const { data } = await api.get("/products")
+    const { data } = await api.get(API_ROUTES.PRODUCTS.BASE)
     return data.data
 }
 
