@@ -11,9 +11,26 @@ import { AuthHydrator } from './AuthHydrator';
 
 function ThemeWrapper({ children }: { children: React.ReactNode }) {
   const mode = useSelector((state: RootState) => state.theme.mode);
+  const [mounted, setMounted] = useState(false);
   
   // Memoize theme to avoid unnecessary re-renders
   const theme = useMemo(() => getTheme(mode), [mode]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Evita Hydration Mismatch renderizando um estado consistente no servidor
+  // O servidor sempre renderiza o tema default (light), e o cliente troca
+  // após a montagem se houver algo no localStorage.
+  if (!mounted) {
+    return (
+      <ThemeProvider theme={getTheme('light')}>
+        <CssBaseline />
+        <div style={{ visibility: 'hidden' }}>{children}</div>
+      </ThemeProvider>
+    );
+  }
 
   return (
     <ThemeProvider theme={theme}>

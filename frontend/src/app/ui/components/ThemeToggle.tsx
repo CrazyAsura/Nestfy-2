@@ -1,16 +1,29 @@
 'use client';
 
-import { IconButton, useTheme } from '@mui/material';
+import { IconButton } from '@mui/material';
 import { WbSunny, NightlightRound } from '@mui/icons-material';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../libs/stores';
 import { toggleTheme } from '../../libs/stores/slices/theme.slice';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
 
 export function ThemeToggle() {
   const mode = useSelector((state: RootState) => state.theme.mode);
   const dispatch = useDispatch();
-  const theme = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <IconButton sx={{ color: '#fbbf24', bgcolor: 'rgba(251, 191, 36, 0.1)' }}>
+        <WbSunny sx={{ fontSize: 24 }} />
+      </IconButton>
+    );
+  }
 
   return (
     <AnimatePresence mode="wait" initial={false}>
