@@ -255,7 +255,9 @@ export default function EditProfileForm({ profile }: Props) {
             onError: (error: any) => {
                  const errorData = error?.response?.data;
                  const errorCode = errorData?.code;
-                 const backendMessage = errorData?.message;
+                 const backendMessage = typeof errorData?.message === 'string' 
+                    ? errorData.message 
+                    : (typeof errorData?.message === 'object' ? JSON.stringify(errorData.message) : null);
  
                  if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
                      setSubmitError('Não foi possível conectar ao servidor. O serviço pode estar temporariamente fora do ar ou você pode estar sem internet. Tente novamente em alguns instantes.');

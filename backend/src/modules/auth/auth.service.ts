@@ -1,6 +1,6 @@
 import { JwtService } from '@nestjs/jwt';
-import argon from 'argon2';
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import * as argon from 'argon2';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { User } from '@prisma/client';
@@ -65,15 +65,33 @@ export class AuthService {
         ddi, ddd, numberPhone
       } = updateDto;
 
+      // Verificar se o email já está em uso por outro usuário
+      if (email && email !== user.email) {
+        const existingEmail = await this.prisma.user.findUnique({ where: { email } });
+        if (existingEmail) {
+          throw new BadRequestException({ code: 'email_already_exists', message: 'Este e-mail já está em uso por outra conta.' });
+        }
+      }
+
+      // Verificar se o documento já está em uso por outro usuário
+      if (document && document !== user.document) {
+        const existingDoc = await this.prisma.user.findUnique({ where: { document } });
+        if (existingDoc) {
+          throw new BadRequestException({ code: 'document_already_exists', message: 'Este CPF/CNPJ já está cadastrado em nosso sistema.' });
+        }
+      }
+
       const finalImage = imageFile ? imageFile.filename : image;
 
       // Converter DDI e DDD para o formato do enum se necessário
       let finalDdi = ddi;
-      if (ddi && !ddi.startsWith('BRA_') && !ddi.startsWith('USA_') && !ddi.startsWith('ARG_')) {
-        // Mapeamento simples ou prefixo padrão
+      if (ddi && !ddi.startsWith('BRA_') && !ddi.startsWith('USA_') && !ddi.startsWith('ARG_') && !ddi.startsWith('CHI_') && !ddi.startsWith('URU_') && !ddi.startsWith('PAR_')) {
         if (ddi === '55') finalDdi = DDI.BRA_55;
         else if (ddi === '1') finalDdi = DDI.USA_1;
-        // Adicione outros conforme necessário ou use um mapeamento mais robusto
+        else if (ddi === '54') finalDdi = DDI.ARG_54;
+        else if (ddi === '56') finalDdi = DDI.CHI_56;
+        else if (ddi === '598') finalDdi = DDI.URU_598;
+        else if (ddi === '595') finalDdi = DDI.PAR_595;
       }
 
       let finalDdd = ddd;
@@ -85,11 +103,11 @@ export class AuthService {
         const updatedUser = await tx.user.update({
           where: { id: user.id },
           data: {
-            name,
-            email,
-            image: finalImage,
-            userType,
-            document,
+            name: name !== undefined ? name : undefined,
+            email: email !== undefined ? email : undefined,
+            image: finalImage !== undefined ? finalImage : undefined,
+            userType: userType !== undefined ? userType : undefined,
+            document: document !== undefined ? document : undefined,
           },
         });
 
@@ -107,7 +125,25 @@ export class AuthService {
       });
     } catch (error) {
       this.logger.error(`Error in updateProfile for user ${user.id}:`, error);
-      throw error;
+      
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      if (error.code === 'P2002') {
+        const target = error.meta?.target;
+        if (Array.isArray(target) && target.includes('email')) {
+          throw new BadRequestException({ code: 'email_already_exists', message: 'Este e-mail já está em uso.' });
+        }
+        if (Array.isArray(target) && target.includes('document')) {
+          throw new BadRequestException({ code: 'document_already_exists', message: 'Este documento já está em uso.' });
+        }
+      }
+
+      throw new BadRequestException({
+        message: 'Não foi possível salvar as alterações. Verifique se todos os campos estão preenchidos corretamente.',
+        error: error.message
+      });
     }
   }
 
@@ -145,11 +181,20 @@ export class AuthService {
       where: { userId },
     });
 
-    const formattedDDI = this.formatEnum(ddi, 'BRA_', DDI.BRA_55);
-    const formattedDDD = this.formatEnum(ddd, 'DDD_', null);
+    // Se ddi já estiver formatado como enum, use-o, senão tente formatar
+    let formattedDDI = ddi;
+    if (ddi && !Object.values(DDI).includes(ddi as DDI)) {
+        formattedDDI = this.formatEnum(ddi, 'BRA_', DDI.BRA_55);
+    }
+    
+    // Se ddd já estiver formatado como enum, use-o, senão tente formatar
+    let formattedDDD = ddd;
+    if (ddd && !Object.values(DDD).includes(ddd as DDD)) {
+        formattedDDD = this.formatEnum(ddd, 'DDD_', null);
+    }
 
     const data = {
-      ddi: formattedDDI as DDI,
+      ddi: (formattedDDI || DDI.BRA_55) as DDI,
       ddd: formattedDDD as DDD,
       numberPhone,
     };
@@ -179,18 +224,50 @@ export class AuthService {
       userType: user.userType,
     };
 
-    const accessToken = await this.jwtService.signAsync(payload);
+    const accessTokenSecret = process.env.JWT_SECRET || 'sung';
+    const refreshTokenSecret = process.env.JWT_REFRESH_SECRET || 'refresh_secret_mudar';
 
-    return {
-      accessToken,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        userType: user.userType,
-      },
-    };
+    try {
+      const [accessToken, refreshToken] = await Promise.all([
+        this.jwtService.signAsync(payload, {
+          secret: accessTokenSecret,
+          expiresIn: (process.env.JWT_EXPIRES_IN as any) || '7d',
+        }),
+        this.jwtService.signAsync(payload, {
+          secret: refreshTokenSecret,
+          expiresIn: '30d' as any,
+        }),
+      ]);
+
+      // Opcional: Limpar tokens antigos do usuário para evitar poluição no banco
+      await this.prisma.refreshToken.deleteMany({
+        where: { userId: user.id }
+      }).catch(err => this.logger.warn(`Erro ao limpar tokens antigos: ${err.message}`));
+
+      // Salvar o novo refresh token
+      await this.prisma.refreshToken.create({
+        data: {
+          token: refreshToken,
+          userId: user.id,
+          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 dias
+        },
+      });
+
+      return {
+        accessToken,
+        refreshToken,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          userType: user.userType,
+        },
+      };
+    } catch (error) {
+      this.logger.error(`Erro ao gerar tokens para o usuário ${user.email}:`, error);
+      throw new InternalServerErrorException('Erro ao processar autenticação. Por favor, tente novamente mais tarde.');
+    }
   }
 
   async register(registerDto: RegisterDto, type: UserType) {
@@ -213,6 +290,12 @@ export class AuthService {
     });
 
     if (existingUser) {
+      if (existingUser.email === email) {
+        throw new BadRequestException({ code: 'email_already_exists', message: 'Email já está em uso' });
+      }
+      if (existingUser.document === document) {
+        throw new BadRequestException({ code: 'document_already_exists', message: 'Documento já está em uso' });
+      }
       throw new BadRequestException('Email ou documento já está em uso');
     }
 
@@ -248,27 +331,48 @@ export class AuthService {
 
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
+    this.logger.log(`Tentativa de login para o email: ${email}`);
 
     try {
-      const user = await this.prisma.user.findUnique({
-        where: { email }
+      const user = await this.prisma.user.findFirst({
+        where: {
+          email: {
+            equals: email.trim(),
+            mode: 'insensitive'
+          },
+          deletedAt: null
+        }
       });
 
       if (!user) {
-        throw new BadRequestException('Email ou senha inválidos');
+        this.logger.warn(`Usuário não encontrado: ${email}`);
+        throw new UnauthorizedException('E-mail ou senha incorretos.');
       }
 
-      const isPasswordValid = await argon.verify(user.password, password);
+      if (!user.isActive) {
+        this.logger.warn(`Tentativa de login em conta desativada: ${email}`);
+        throw new UnauthorizedException('Esta conta está desativada. Entre em contato com o suporte.');
+      }
+
+      const isPasswordValid = await argon.verify(user.password, password).catch((err) => {
+        this.logger.error(`Erro técnico ao verificar senha para ${email}:`, err);
+        throw new InternalServerErrorException('Erro na verificação de segurança.');
+      });
 
       if (!isPasswordValid) {
-        throw new BadRequestException('Email ou senha inválidos');
+        this.logger.warn(`Senha inválida para o usuário: ${email}`);
+        throw new UnauthorizedException('E-mail ou senha incorretos.');
       }
-      
-      return this.generateToken(user);
+
+      this.logger.log(`Login bem-sucedido para: ${email}`);
+      return await this.generateToken(user);
     } catch (error) {
-      if (error instanceof BadRequestException) throw error;
-      this.logger.error('Erro inesperado durante o login:', error);
-      throw new InternalServerErrorException('Erro interno ao processar login');
+      if (error instanceof UnauthorizedException || error instanceof InternalServerErrorException) {
+        throw error;
+      }
+
+      this.logger.error(`Erro inesperado no login para ${email}:`, error);
+      throw new InternalServerErrorException('Ocorreu um erro inesperado. Tente novamente mais tarde.');
     }
   }
 
@@ -281,19 +385,37 @@ export class AuthService {
 
   async refreshToken(refreshToken: string) {
     try {
-      const payload = this.jwtService.verify(refreshToken);
-      const user = await this.prisma.user.findUnique({
-        where: { id: payload.sub }
+      // Verificar se o token existe no banco
+      const storedToken = await this.prisma.refreshToken.findUnique({
+        where: { token: refreshToken },
+        include: { user: true }
       });
 
-      if (!user) {
-        throw new BadRequestException('Refresh token inválido');
+      if (!storedToken || storedToken.expiresAt < new Date()) {
+        if (storedToken) {
+          await this.prisma.refreshToken.delete({ where: { id: storedToken.id } });
+        }
+        throw new BadRequestException('Sessão expirada. Por favor, faça login novamente.');
       }
 
-      return this.generateToken(user);
+      const payload = await this.jwtService.verifyAsync(refreshToken, {
+        secret: process.env.JWT_REFRESH_SECRET || 'refresh_secret_mudar',
+      });
+
+      if (payload.sub !== storedToken.userId) {
+        throw new BadRequestException('Token inválido');
+      }
+
+      // Remover o token antigo (estratégia de rotação de refresh token)
+      await this.prisma.refreshToken.delete({
+        where: { id: storedToken.id }
+      });
+
+      return this.generateToken(storedToken.user);
     } catch (error) {
       this.logger.error('Erro na renovação do token:', error.message);
-      throw new BadRequestException('Refresh token inválido');
+      if (error instanceof BadRequestException) throw error;
+      throw new BadRequestException('Não foi possível renovar sua sessão. Faça login novamente.');
     }
   }
 

@@ -30,6 +30,7 @@ import ReceiptIcon from '@mui/icons-material/Receipt'
 import PersonIcon from '@mui/icons-material/Person'
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
 import ExitToAppIcon from '@mui/icons-material/ExitToApp'
+import { ThemeToggle } from './ThemeToggle'
 
 import { motion, AnimatePresence, Variants } from 'framer-motion'
 
@@ -85,39 +86,44 @@ export function StoreMenu() {
         animate={{ y: 0 }}
         transition={{ type: 'spring', stiffness: 120, damping: 20 }}
         sx={{
-          bgcolor: 'rgba(0,0,0,0.9)',
+          bgcolor: 'background.paper',
           backdropFilter: 'blur(10px)',
-          borderBottom: '1px solid rgba(255,255,255,0.1)'
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          backgroundImage: 'none'
         }}
       >
-        <Toolbar>
-          <IconButton
-            edge="start"
-            color="inherit"
-            onClick={toggleDrawer(true)}
-            sx={{ mr: 2 }}
-            component={motion.button}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <MenuIcon />
-          </IconButton>
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <IconButton
+              edge="start"
+              color="inherit"
+              onClick={toggleDrawer(true)}
+              sx={{ mr: 2 }}
+              component={motion.button}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography
+              variant="h6"
+              component={Link}
+              href="/"
+              sx={{
+                textDecoration: 'none',
+                color: 'inherit',
+                fontWeight: 800,
+                letterSpacing: '-0.5px'
+              }}
+            >
+              LOJA VIRTUAL
+            </Typography>
+          </Box>
 
-          <Typography
-            variant="h6"
-            component={motion.div}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
-            sx={{
-              flexGrow: 1,
-              fontWeight: 900,
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase'
-            }}
-          >
-            Nestfy
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <ThemeToggle />
+          </Box>
         </Toolbar>
       </MotionAppBar>
 
@@ -128,10 +134,11 @@ export function StoreMenu() {
         onClose={toggleDrawer(false)}
         PaperProps={{
           sx: {
-            bgcolor: '#000',
-            color: '#fff',
+            bgcolor: 'background.paper',
+            color: 'text.primary',
             width: 280,
-            overflowX: 'hidden'
+            overflowX: 'hidden',
+            backgroundImage: 'none'
           }
         }}
       >
@@ -143,9 +150,6 @@ export function StoreMenu() {
         >
           <Typography 
             variant="h5" 
-            component={motion.h5}
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
             sx={{ fontWeight: 900, mb: 2 }}
           >
             MENU
@@ -153,16 +157,15 @@ export function StoreMenu() {
 
           <List>
             <AnimatePresence>
-
               {/* HOME */}
               <MotionListItem 
                 key="home" 
                 variants={itemVariants}
-                whileHover={{ x: 10, backgroundColor: 'rgba(255,255,255,0.1)' }}
+                whileHover={{ x: 10, backgroundColor: 'action.hover' }}
                 whileTap={{ scale: 0.95 }}
               >
                 <ListItemButton component={Link} href="/" onClick={toggleDrawer(false)}>
-                  <ListItemIcon sx={{ color: '#fff' }}><StoreIcon /></ListItemIcon>
+                  <ListItemIcon sx={{ color: 'inherit' }}><StoreIcon /></ListItemIcon>
                   <ListItemText primary="Home" />
                 </ListItemButton>
               </MotionListItem>
@@ -171,11 +174,11 @@ export function StoreMenu() {
               <MotionListItem 
                 key="categories" 
                 variants={itemVariants}
-                whileHover={{ x: 10, backgroundColor: 'rgba(255,255,255,0.1)' }}
+                whileHover={{ x: 10, backgroundColor: 'action.hover' }}
                 whileTap={{ scale: 0.95 }}
               >
                 <ListItemButton component={Link} href="/categories" onClick={toggleDrawer(false)}>
-                  <ListItemIcon sx={{ color: '#fff' }}><CategoryIcon /></ListItemIcon>
+                  <ListItemIcon sx={{ color: 'inherit' }}><CategoryIcon /></ListItemIcon>
                   <ListItemText primary="Categories" />
                 </ListItemButton>
               </MotionListItem>
@@ -185,11 +188,11 @@ export function StoreMenu() {
                 <MotionListItem 
                   key="cart" 
                   variants={itemVariants}
-                  whileHover={{ x: 10, backgroundColor: 'rgba(255,255,255,0.1)' }}
+                  whileHover={{ x: 10, backgroundColor: 'action.hover' }}
                   whileTap={{ scale: 0.95 }}
                 >
                   <ListItemButton component={Link} href="/cart" onClick={toggleDrawer(false)}>
-                    <ListItemIcon sx={{ color: '#fff' }}><ShoppingCartIcon /></ListItemIcon>
+                    <ListItemIcon sx={{ color: 'inherit' }}><ShoppingCartIcon /></ListItemIcon>
                     <ListItemText primary="Cart" />
                   </ListItemButton>
                 </MotionListItem>
@@ -200,11 +203,11 @@ export function StoreMenu() {
                 <MotionListItem 
                   key="orders" 
                   variants={itemVariants}
-                  whileHover={{ x: 10, backgroundColor: 'rgba(255,255,255,0.1)' }}
+                  whileHover={{ x: 10, backgroundColor: 'action.hover' }}
                   whileTap={{ scale: 0.95 }}
                 >
                   <ListItemButton component={Link} href="/orders" onClick={toggleDrawer(false)}>
-                    <ListItemIcon sx={{ color: '#fff' }}><ReceiptIcon /></ListItemIcon>
+                    <ListItemIcon sx={{ color: 'inherit' }}><ReceiptIcon /></ListItemIcon>
                     <ListItemText primary="Orders" />
                   </ListItemButton>
                 </MotionListItem>
@@ -215,11 +218,11 @@ export function StoreMenu() {
                 <MotionListItem 
                   key="profile" 
                   variants={itemVariants}
-                  whileHover={{ x: 10, backgroundColor: 'rgba(255,255,255,0.1)' }}
+                  whileHover={{ x: 10, backgroundColor: 'action.hover' }}
                   whileTap={{ scale: 0.95 }}
                 >
                   <ListItemButton component={Link} href="/profile" onClick={toggleDrawer(false)}>
-                    <ListItemIcon sx={{ color: '#fff' }}><PersonIcon /></ListItemIcon>
+                    <ListItemIcon sx={{ color: 'inherit' }}><PersonIcon /></ListItemIcon>
                     <ListItemText primary="Profile" />
                   </ListItemButton>
                 </MotionListItem>
@@ -230,11 +233,11 @@ export function StoreMenu() {
                 <MotionListItem 
                   key="admin" 
                   variants={itemVariants}
-                  whileHover={{ x: 10, backgroundColor: 'rgba(255,255,255,0.1)' }}
+                  whileHover={{ x: 10, backgroundColor: 'action.hover' }}
                   whileTap={{ scale: 0.95 }}
                 >
                   <ListItemButton component={Link} href="/admin" onClick={toggleDrawer(false)}>
-                    <ListItemIcon sx={{ color: '#fff' }}><AdminPanelSettingsIcon /></ListItemIcon>
+                    <ListItemIcon sx={{ color: 'inherit' }}><AdminPanelSettingsIcon /></ListItemIcon>
                     <ListItemText primary="Admin" />
                   </ListItemButton>
                 </MotionListItem>
@@ -245,11 +248,11 @@ export function StoreMenu() {
                 <MotionListItem 
                   key="login" 
                   variants={itemVariants}
-                  whileHover={{ x: 10, backgroundColor: 'rgba(255,255,255,0.1)' }}
+                  whileHover={{ x: 10, backgroundColor: 'action.hover' }}
                   whileTap={{ scale: 0.95 }}
                 >
                   <ListItemButton component={Link} href="/login" onClick={toggleDrawer(false)}>
-                    <ListItemIcon sx={{ color: '#fff' }}><PersonIcon /></ListItemIcon>
+                    <ListItemIcon sx={{ color: 'inherit' }}><PersonIcon /></ListItemIcon>
                     <ListItemText primary="Login" />
                   </ListItemButton>
                 </MotionListItem>
@@ -260,11 +263,11 @@ export function StoreMenu() {
                 <MotionListItem 
                   key="logout" 
                   variants={itemVariants}
-                  whileHover={{ x: 10, backgroundColor: 'rgba(255,255,255,0.1)' }}
+                  whileHover={{ x: 10, backgroundColor: 'action.hover' }}
                   whileTap={{ scale: 0.95 }}
                 >
                   <ListItemButton onClick={handleLogout}>
-                    <ListItemIcon sx={{ color: '#fff' }}><ExitToAppIcon /></ListItemIcon>
+                    <ListItemIcon sx={{ color: 'inherit' }}><ExitToAppIcon /></ListItemIcon>
                     <ListItemText primary="Logout" />
                   </ListItemButton>
                 </MotionListItem>

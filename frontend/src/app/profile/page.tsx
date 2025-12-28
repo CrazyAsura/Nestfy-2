@@ -30,7 +30,7 @@ export default function Profile() {
     }
     return (
         <>
-            <Box minHeight="100vh" bgcolor="#f5f5f5" py={6}>
+            <Box minHeight="100vh" bgcolor="background.defaul" py={6}>
                 <Container maxWidth='sm'>
                     <MotionPaper
                     initial={{ opacity: 0, y: 20 }}

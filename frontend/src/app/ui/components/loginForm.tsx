@@ -72,7 +72,9 @@ export default function LoginForm () {
             minHeight: '100vh',
             display: 'flex',
             alignItems: 'center',
-            background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+            background: (theme) => theme.palette.mode === 'light' 
+                ? 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'
+                : 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
             py: 4
         }}>
             <Container maxWidth='xs'>
@@ -84,36 +86,48 @@ export default function LoginForm () {
                     sx={{
                         p: { xs: 3, md: 6 },
                         borderRadius: 4,
-                        bgcolor: 'rgba(255, 255, 255, 0.9)',
+                        bgcolor: 'background.paper',
                         backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        border: '1px solid',
+                        borderColor: 'divider',
                     }}
                 >
                     <Typography 
                         variant='h4'
                         align='center'
-                        sx={{ fontWeight: 900, mb: 1, color: '#1a1a1a' }}
+                        sx={{ fontWeight: 900, mb: 1, color: 'text.primary' }}
                     >
                         Bem-vindo
                     </Typography>
                     <Typography 
                         variant='body1'
                         align='center'
-                        sx={{ color: '#666', mb: 4 }}
+                        sx={{ mb: 4, color: 'text.secondary' }}
                     >
-                        Acesse sua conta para continuar
+                        Faça login para continuar comprando
                     </Typography>
 
-                    <Box component='form' onSubmit={handleSubmit(onSubmit)}>
+                    {submitError && (
+                        <Box sx={{ 
+                            mb: 3, 
+                            p: 2, 
+                            borderRadius: 2, 
+                            bgcolor: 'error.main',
+                            color: 'error.contrastText'
+                        }}>
+                            <Typography variant="body2">{submitError}</Typography>
+                        </Box>
+                    )}
+
+                    <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
                         <TextField
-                            label="E-mail" 
                             fullWidth
-                            autoComplete="email"
+                            label="E-mail"
                             {...register('email')}
                             error={!!errors.email}
                             helperText={errors.email?.message}
-                            InputLabelProps={{ shrink: true }}
-                            sx={{ mb: 3 }}
+                            margin="normal"
+                            variant="outlined"
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
@@ -122,17 +136,15 @@ export default function LoginForm () {
                                 ),
                             }}
                         />
-
-                        <TextField 
-                            type={showPassword ? 'text' : 'password'}
-                            label="Senha"
+                        <TextField
                             fullWidth
-                            autoComplete="current-password"
+                            label="Senha"
+                            type={showPassword ? 'text' : 'password'}
                             {...register('password')}
                             error={!!errors.password}
                             helperText={errors.password?.message}
-                            InputLabelProps={{ shrink: true }}
-                            sx={{ mb: 2 }}
+                            margin="normal"
+                            variant="outlined"
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
@@ -141,77 +153,69 @@ export default function LoginForm () {
                                 ),
                                 endAdornment: (
                                     <InputAdornment position="end">
-                                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                                        <IconButton
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            edge="end"
+                                        >
                                             {showPassword ? <VisibilityOff /> : <Visibility />}
                                         </IconButton>
                                     </InputAdornment>
-                                )
+                                ),
                             }}
                         />
 
-                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
-                            <Link 
-                                href="/reset-password"
-                                style={{ 
-                                    color: '#666', 
-                                    fontSize: '0.875rem',
-                                    textDecoration: 'none',
-                                    fontWeight: 600
-                                }}
-                            >
-                                Esqueceu a senha?
-                            </Link>
-                        </Box>
-
-                        {submitError && (
-                            <Typography 
-                                color="error" 
-                                variant="body2" 
-                                align="center" 
-                                sx={{ mb: 2, fontWeight: 600 }}
-                            >
-                                {submitError}
-                            </Typography>
-                        )}
-
                         <Button
-                            type='submit'
-                            variant="contained"
                             fullWidth
+                            type="submit"
+                            variant="contained"
                             disabled={isPending}
-                            endIcon={isPending ? <CircularProgress size={20} color="inherit" /> : <LoginIcon />}
-                            sx={{ 
-                                bgcolor: '#000',
-                                '&:hover': { bgcolor: '#333' },
-                                fontWeight: 700,
+                            sx={{
+                                mt: 4,
+                                mb: 2,
                                 py: 1.5,
-                                borderRadius: 2,
-                                mb: 4
+                                fontSize: '1.1rem',
+                                position: 'relative'
                             }}
                         >
-                            {isPending ? "Entrando..." : "Entrar"}
+                            {isPending ? (
+                                <CircularProgress size={24} color="inherit" />
+                            ) : (
+                                <>
+                                    Entrar
+                                    <LoginIcon sx={{ ml: 1 }} />
+                                </>
+                            )}
                         </Button>
 
-                        <Box sx={{ textAlign: 'center' }}>
-                            <Typography variant="body2" sx={{ color: '#666' }}>
-                                Não tem uma conta? 
+                        <Box sx={{ textAlign: 'center', mt: 2 }}>
+                            <Typography variant="body2" color="text.secondary">
+                                Não tem uma conta?{' '}
                                 <Link 
-                                    href="/register"
+                                    href="/register" 
                                     style={{ 
-                                        color: '#000', 
-                                        fontWeight: 800, 
-                                        marginLeft: '8px',
-                                        textDecoration: 'none',
-                                        borderBottom: '2px solid #000'
+                                        color: 'inherit',
+                                        fontWeight: 600,
+                                        textDecoration: 'underline'
                                     }}
                                 >
-                                    CADASTRE-SE
+                                    Cadastre-se
                                 </Link>
                             </Typography>
+                            <Box sx={{ mt: 1 }}>
+                                <Link 
+                                    href="/reset-password" 
+                                    style={{ 
+                                        color: 'inherit', 
+                                        fontSize: '0.875rem'
+                                    }}
+                                >
+                                    Esqueceu a senha?
+                                </Link>
+                            </Box>
                         </Box>
                     </Box>
                 </MotionPaper>
             </Container>
         </Box>
-    )
+    );
 }

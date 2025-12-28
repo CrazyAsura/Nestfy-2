@@ -12,6 +12,8 @@ type Props = {
 }
 
 export default function ProfileHeader({name, email, image}: Props) {
+    const imageUrl = image ? (image.startsWith('http') ? image : `/uploads/${image}`) : undefined;
+
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3, position: 'relative' }}>
             <Box sx={{ position: 'absolute', right: 0, top: 0 }}>
@@ -26,7 +28,7 @@ export default function ProfileHeader({name, email, image}: Props) {
                 </Button>
             </Box>
             <Avatar 
-                src={image || undefined} 
+                src={imageUrl} 
                 sx={{ width: 100, height: 100, mb: 2, bgcolor: 'primary.main' }}
             >
                 {name?.charAt(0).toUpperCase()}
