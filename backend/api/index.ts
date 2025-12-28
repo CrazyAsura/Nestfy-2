@@ -18,7 +18,7 @@ export const bootstrap = async (expressInstance: express.Express) => {
 
   const frontendUrl = process.env.FRONTEND_URL || '*';
   app.enableCors({
-    origin: (origin, callback) => {
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
       if (!origin || frontendUrl === '*' || origin === frontendUrl || origin.endsWith('.vercel.app')) {
         callback(null, true);
       } else {
