@@ -37,6 +37,8 @@ export const bootstrap = async (expressInstance: express.Express) => {
     }),
   );
 
+  app.setGlobalPrefix('api');
+
   const config = new DocumentBuilder()
     .setTitle('Ecommerce API')
     .setDescription('The Ecommerce API description')
@@ -45,7 +47,7 @@ export const bootstrap = async (expressInstance: express.Express) => {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api/docs', app, document);
 
   await app.init();
 };

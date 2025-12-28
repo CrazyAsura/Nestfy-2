@@ -2,12 +2,17 @@ import axios from "axios";
 import { store } from "../../stores";
 
 const getBaseURL = () => {
-    // No cliente, usamos o proxy /api definido no next.config.ts para evitar CORS
-    if (typeof window !== 'undefined') {
-        return '/api';
+    const publicApiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    // Se tivermos a URL pública, garantimos que ela termine com /api
+    if (publicApiUrl) {
+        const normalizedUrl = publicApiUrl.replace(/\/$/, '');
+        // Se a URL já termina com /api, não adicionamos de novo
+        return normalizedUrl.endsWith('/api') ? normalizedUrl : `${normalizedUrl}/api`;
     }
-    // No servidor (SSR/Build), usamos a URL direta do backend
-    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+    // Fallback para desenvolvimento local via proxy do Next.js
+    return '/api';
 };
 
 export const api = axios.create({
