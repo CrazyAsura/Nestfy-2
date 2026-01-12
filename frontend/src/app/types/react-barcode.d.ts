@@ -3,7 +3,7 @@ declare module 'react-barcode' {
 
   interface BarcodeProps {
     value: string;
-    format?: 'CODE39' | 'CODE128' | 'EAN13' | 'ITF14' | 'MSI' | 'pharmacode' | 'codabar';
+    format?: 'CODE39' | 'CODE128' | 'EAN13' | 'ITF' | 'ITF14' | 'MSI' | 'pharmacode' | 'codabar' | 'UPC' | 'EAN8';
     width?: number;
     height?: number;
     displayValue?: boolean;
