@@ -9,6 +9,14 @@ export type Product = {
     sku: string;
     categoryId: string;
     brandId?: string;
+    brand?: {
+        id: string;
+        name: string;
+    };
+    category?: {
+        id: string;
+        name: string;
+    };
     materialId?: string;
     riskId?: string;
     imageUrl?: string;

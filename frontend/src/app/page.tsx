@@ -21,7 +21,7 @@ export default function Home() {
               { icon: <Star sx={{ fontSize: 40 }} />, title: "Curadoria", desc: "Seleção exclusiva de marcas globais" },
               { icon: <SupportAgent sx={{ fontSize: 40 }} />, title: "Concierge", desc: "Atendimento personalizado 24/7" },
             ].map((item, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
                 <Stack alignItems="center" textAlign="center" spacing={2}>
                   <Box sx={{ color: 'primary.main' }}>{item.icon}</Box>
                   <Typography variant="h6" sx={{ fontFamily: 'var(--font-playfair)', fontWeight: 600 }}>
