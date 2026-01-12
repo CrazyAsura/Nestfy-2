@@ -52,20 +52,55 @@ export class ProductService {
     return this.findOne(savedProduct.id);
   }
 
-  async findAll(page = 1, limit = 10) { 
+  async findAll(
+    page = 1, 
+    limit = 10, 
+    search?: string, 
+    categoryId?: string,
+    minPrice?: number,
+    maxPrice?: number,
+    sortBy?: string,
+    order: 'asc' | 'desc' = 'desc'
+  ) { 
     const currentPage = Math.max(Number(page), 1);
     const perPage = Math.min(Math.max(Number(limit), 1), 100);
+
+    const query: any = {};
+
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    if (categoryId) {
+      query.categoryId = categoryId;
+    }
+
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      query.price = {};
+      if (minPrice !== undefined) query.price.$gte = Number(minPrice);
+      if (maxPrice !== undefined) query.price.$lte = Number(maxPrice);
+    }
+
+    const sort: any = {};
+    if (sortBy) {
+      sort[sortBy] = order === 'asc' ? 1 : -1;
+    } else {
+      sort.createdAt = -1;
+    }
 
     const skip = (currentPage - 1) * perPage;
 
     const [products, total] = await Promise.all([
-      this.productModel.find()
+      this.productModel.find(query)
         .populate('category')
         .skip(skip)
         .limit(perPage)
-        .sort({ createdAt: -1 })
+        .sort(sort)
         .exec(),
-      this.productModel.countDocuments()
+      this.productModel.countDocuments(query)
     ]);
     
     return {

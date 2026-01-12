@@ -16,8 +16,23 @@ export class ProductController {
   findAll(
     @Query('page') page?: number,
     @Query('limit') limit?: number,
+    @Query('search') search?: string,
+    @Query('categoryId') categoryId?: string,
+    @Query('minPrice') minPrice?: number,
+    @Query('maxPrice') maxPrice?: number,
+    @Query('sortBy') sortBy?: string,
+    @Query('order') order?: 'asc' | 'desc',
   ) {
-    return this.productService.findAll(page, limit);
+    return this.productService.findAll(
+      page, 
+      limit, 
+      search, 
+      categoryId, 
+      minPrice, 
+      maxPrice, 
+      sortBy, 
+      order
+    );
   }
 
   @Get(':id')
