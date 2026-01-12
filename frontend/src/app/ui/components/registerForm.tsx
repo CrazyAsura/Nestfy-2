@@ -38,10 +38,12 @@ import {
   Phone as PhoneIcon,
   ArrowBack,
   ArrowForward,
-  CheckCircle
+  CheckCircle,
+  Policy
 } from '@mui/icons-material';
+import { FormControlLabel, Checkbox } from '@mui/material';
 
-const steps = ['Identificação', 'Segurança', 'Endereço & Contato'];
+const steps = ['Identificação', 'Segurança', 'Endereço & Contato', 'Privacidade'];
 
 const containerVariants = {
     hidden: { opacity: 0, x: 20 },
@@ -95,6 +97,7 @@ export default function RegisterForm () {
             state: '',
             ddd: '',
             numberPhone: '',
+            privacyPolicy: false,
         }
     });
 
@@ -154,6 +157,8 @@ export default function RegisterForm () {
             fieldsToValidate = ['name', 'email', 'userType', 'document'];
         } else if (activeStep === 1) {
             fieldsToValidate = ['password', 'confirmPassword'];
+        } else if (activeStep === 2) {
+            fieldsToValidate = ['zipCode', 'number', 'street', 'neighborhood', 'city', 'state', 'ddd', 'numberPhone'];
         }
 
         const isStepValid = await trigger(fieldsToValidate);
@@ -551,6 +556,91 @@ export default function RegisterForm () {
                                             )}
                                         />
                                     </Box>
+                                </motion.div>
+                            )}
+
+                            {activeStep === 3 && (
+                                <motion.div
+                                    key="step4"
+                                    variants={containerVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                    exit="exit"
+                                    transition={{ duration: 0.3 }}
+                                >
+                                    <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Policy color="primary" />
+                                        <Typography variant="h6" fontWeight={700}>Privacidade & Termos</Typography>
+                                    </Box>
+
+                                    <Paper 
+                                        variant="outlined" 
+                                        sx={{ 
+                                            p: 2, 
+                                            maxHeight: 250, 
+                                            overflowY: 'auto', 
+                                            bgcolor: '#f8f9fa',
+                                            mb: 2,
+                                            fontSize: '0.875rem',
+                                            color: '#444',
+                                            '&::-webkit-scrollbar': { width: '8px' },
+                                            '&::-webkit-scrollbar-thumb': { bgcolor: '#ccc', borderRadius: '4px' }
+                                        }}
+                                    >
+                                        <Typography variant="subtitle2" fontWeight={800} gutterBottom>
+                                            Política de Privacidade (LGPD)
+                                        </Typography>
+                                        <Typography variant="body2" paragraph>
+                                            Ao utilizar nossos serviços, você concorda com a coleta e uso de suas informações pessoais conforme descrito nesta política. 
+                                            Nós respeitamos sua privacidade e estamos comprometidos em proteger seus dados pessoais.
+                                        </Typography>
+                                        <Typography variant="body2" paragraph>
+                                            <strong>1. Coleta de Dados:</strong> Coletamos dados como nome, e-mail, documento (CPF/CNPJ), endereço e telefone para fins de cadastro, 
+                                            processamento de pedidos e comunicação.
+                                        </Typography>
+                                        <Typography variant="body2" paragraph>
+                                            <strong>2. Uso de Dados:</strong> Seus dados são utilizados para garantir a segurança da sua conta, processar transações e 
+                                            personalizar sua experiência em nossa plataforma.
+                                        </Typography>
+                                        <Typography variant="body2" paragraph>
+                                            <strong>3. Segurança:</strong> Implementamos medidas técnicas e organizacionais para proteger seus dados contra acesso não autorizado, 
+                                            perda ou alteração.
+                                        </Typography>
+                                        <Typography variant="body2" paragraph>
+                                            <strong>4. Seus Direitos:</strong> Sob a LGPD, você tem o direito de acessar, corrigir ou excluir seus dados a qualquer momento através 
+                                            de nossas configurações de conta ou suporte.
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            Para mais detalhes, consulte nossa página completa de Política de Privacidade no rodapé do site.
+                                        </Typography>
+                                    </Paper>
+
+                                    <Controller
+                                        name="privacyPolicy"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox 
+                                                        {...field} 
+                                                        checked={field.value}
+                                                        color="primary"
+                                                        onChange={(e) => field.onChange(e.target.checked)}
+                                                    />
+                                                }
+                                                label={
+                                                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                                        Li e concordo com os termos da Política de Privacidade e LGPD.
+                                                    </Typography>
+                                                }
+                                            />
+                                        )}
+                                    />
+                                    {errors.privacyPolicy && (
+                                        <Typography color="error" variant="caption" sx={{ display: 'block', mt: 1 }}>
+                                            {errors.privacyPolicy.message}
+                                        </Typography>
+                                    )}
                                 </motion.div>
                             )}
                         </AnimatePresence>

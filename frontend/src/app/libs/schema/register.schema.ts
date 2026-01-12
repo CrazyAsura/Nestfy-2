@@ -38,6 +38,7 @@ export const registerSchema = z.object({
   city: z.string().min(1, "A cidade é obrigatória"),
   state: z.string().min(1, "O estado é obrigatório"),
   country: z.string().min(1, "O país é obrigatório"),
+  privacyPolicy: z.boolean().refine(val => val === true, "Você deve aceitar os termos de privacidade"),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "As senhas não coincidem",
   path: ['confirmPassword'],

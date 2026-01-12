@@ -16,10 +16,19 @@ export function useProductsCaroussel() {
     })
 }
 
-export function useProducts(page: number, limit: number) {
+export function useProducts(
+    page: number, 
+    limit: number, 
+    search?: string, 
+    categoryId?: string,
+    minPrice?: number,
+    maxPrice?: number,
+    sortBy?: string,
+    order?: 'asc' | 'desc'
+) {
     return useQuery({
-        queryKey: ['products', page],
-        queryFn: () => fetchProducts(page, limit),
+        queryKey: ['products', page, limit, search, categoryId, minPrice, maxPrice, sortBy, order],
+        queryFn: () => fetchProducts(page, limit, search, categoryId, minPrice, maxPrice, sortBy, order),
         placeholderData: keepPreviousData,
     })
 }

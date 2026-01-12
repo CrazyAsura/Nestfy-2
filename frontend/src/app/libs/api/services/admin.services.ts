@@ -49,6 +49,16 @@ export async function deleteUser(userId: string) {
     return response.data;
 }
 
+export async function banUser(userId: string) {
+    const response = await api.patch(`${process.env.NEXT_PUBLIC_API_URL}/admin/users/${userId}/ban`);
+    return response.data;
+}
+
+export async function unbanUser(userId: string) {
+    const response = await api.patch(`${process.env.NEXT_PUBLIC_API_URL}/admin/users/${userId}/unban`);
+    return response.data;
+}
+
 export async function getUserHistoric(userId: string) {
     const response = await api.get(API_ROUTES.ADMIN.USER_HISTORIC(userId));
     return response.data;

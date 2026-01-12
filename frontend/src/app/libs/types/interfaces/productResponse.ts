@@ -6,5 +6,6 @@ export interface ProductResponse {
         total: number;
         page: number;
         limit: number;
+        totalPages: number;
     };
 }

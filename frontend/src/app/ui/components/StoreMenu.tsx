@@ -312,6 +312,25 @@ export function StoreMenu() {
                 </ListItemButton>
               </MotionListItem>
 
+              {/* PRODUCTS */}
+              <MotionListItem 
+                key="products" 
+                disablePadding
+                variants={itemVariants}
+                whileHover={{ x: 10 }}
+              >
+                <ListItemButton component={Link} href="/products" onClick={toggleDrawer(false)} sx={{ py: 1.5 }}>
+                  <ListItemText 
+                    primary="PRODUTOS" 
+                    primaryTypographyProps={{ 
+                      fontSize: '1rem', 
+                      letterSpacing: '0.2em',
+                      fontWeight: 400
+                    }} 
+                  />
+                </ListItemButton>
+              </MotionListItem>
+
               {/* CART (SÓ LOGADO) */}
               {user && (
                 <MotionListItem 

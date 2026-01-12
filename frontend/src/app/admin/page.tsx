@@ -27,6 +27,7 @@ import {
   Button,
   IconButton,
   Tooltip,
+  Stack,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -54,6 +55,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import BlockIcon from '@mui/icons-material/Block';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
@@ -72,7 +75,9 @@ import {
   useCreateProduct,
   useUpdateProduct,
   useCreateCategory,
-  useUpdateCategory
+  useUpdateCategory,
+  useBanUser,
+  useUnbanUser
 } from '@/app/libs/hooks/useAdmin';
 import { Role } from '@/app/libs/types/enums';
 
@@ -114,6 +119,8 @@ export default function AdminPage() {
 
   // Mutations
   const deleteUserMutation = useDeleteUser();
+  const banUserMutation = useBanUser();
+  const unbanUserMutation = useUnbanUser();
   const deleteProductMutation = useDeleteProduct();
   const deleteCategoryMutation = useDeleteCategory();
   
@@ -546,10 +553,10 @@ export default function AdminPage() {
                   <TableRow>
                     <TableCell>Nome</TableCell>
                     <TableCell>Email</TableCell>
-                    <TableCell>Senha</TableCell>
+                    <TableCell>Senha (Hash)</TableCell>
+                    <TableCell>IP</TableCell>
                     <TableCell>Tipo</TableCell>
-                    <TableCell>Cadastro</TableCell>
-                    <TableCell>Atualizado</TableCell>
+                    <TableCell>Status</TableCell>
                     <TableCell align="right">Ações</TableCell>
                   </TableRow>
                 </TableHead>
@@ -559,7 +566,7 @@ export default function AdminPage() {
                   ) : filteredUsers?.length === 0 ? (
                     <TableRow><TableCell colSpan={7} align="center">Nenhum usuário encontrado</TableCell></TableRow>
                   ) : filteredUsers?.map((user: any) => (
-                    <TableRow key={user.id} hover>
+                    <TableRow key={user.id} hover sx={{ opacity: user.isBanned ? 0.6 : 1 }}>
                       <TableCell sx={{ fontWeight: 'bold' }}>{user.name}</TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>
@@ -569,6 +576,7 @@ export default function AdminPage() {
                             bgcolor: 'action.hover', 
                             px: 1, 
                             borderRadius: 1,
+                            fontSize: '0.75rem',
                             filter: showPasswords[user.id] ? 'none' : 'blur(4px)',
                             transition: 'filter 0.2s'
                           }}>
@@ -580,17 +588,48 @@ export default function AdminPage() {
                         </Box>
                       </TableCell>
                       <TableCell>
+                        <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>
+                          {user.lastIp || 'N/A'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
                         <Chip label={user.role} size="small" color={user.role === Role.ADMIN ? 'primary' : 'default'} />
                       </TableCell>
-                      <TableCell>{formatDate(user.createdAt)}</TableCell>
-                      <TableCell>{formatDate(user.updatedAt)}</TableCell>
+                      <TableCell>
+                        {user.isBanned ? (
+                          <Chip label="BANIDO" size="small" color="error" variant="filled" />
+                        ) : (
+                          <Chip label="ATIVO" size="small" color="success" variant="outlined" />
+                        )}
+                      </TableCell>
                       <TableCell align="right">
-                        <IconButton size="small" color="primary" onClick={() => handleOpenUserDialog(user)}>
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton size="small" color="error" onClick={() => handleDeleteUser(user.id)}>
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
+                        <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                          <Tooltip title="Editar">
+                            <IconButton size="small" color="primary" onClick={() => handleOpenUserDialog(user)}>
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          
+                          {user.isBanned ? (
+                            <Tooltip title="Desbanir">
+                              <IconButton size="small" color="success" onClick={() => unbanUserMutation.mutate(user.id)}>
+                                <CheckCircleIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          ) : (
+                            <Tooltip title="Banir">
+                              <IconButton size="small" color="warning" onClick={() => banUserMutation.mutate(user.id)}>
+                                <BlockIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+
+                          <Tooltip title="Remover (Soft Delete)">
+                            <IconButton size="small" color="error" onClick={() => handleDeleteUser(user.id)}>
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Stack>
                       </TableCell>
                     </TableRow>
                   ))}

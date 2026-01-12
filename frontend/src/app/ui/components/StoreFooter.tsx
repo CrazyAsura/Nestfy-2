@@ -76,9 +76,15 @@ export function StoreFooter() {
               SUPORTE
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Typography variant="caption" sx={{ color: 'text.secondary', letterSpacing: '0.1em' }}>FAQ</Typography>
-              <Typography variant="caption" sx={{ color: 'text.secondary', letterSpacing: '0.1em' }}>POLÍTICA DE PRIVACIDADE</Typography>
-              <Typography variant="caption" sx={{ color: 'text.secondary', letterSpacing: '0.1em' }}>TERMOS DE SERVIÇO</Typography>
+              <Link href="/faq" style={{ color: 'inherit', textDecoration: 'none' }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', letterSpacing: '0.1em', '&:hover': { color: 'primary.main' } }}>FAQ</Typography>
+              </Link>
+              <Link href="/privacy-policy" style={{ color: 'inherit', textDecoration: 'none' }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', letterSpacing: '0.1em', '&:hover': { color: 'primary.main' } }}>POLÍTICA DE PRIVACIDADE</Typography>
+              </Link>
+              <Link href="/terms-of-service" style={{ color: 'inherit', textDecoration: 'none' }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', letterSpacing: '0.1em', '&:hover': { color: 'primary.main' } }}>TERMOS DE SERVIÇO</Typography>
+              </Link>
             </Box>
           </Grid>
 

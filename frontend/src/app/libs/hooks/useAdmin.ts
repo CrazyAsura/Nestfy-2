@@ -118,6 +118,26 @@ export function useDeleteUser()  {
     });
 }
 
+export function useBanUser() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (userId: string) => adminService.banUser(userId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+        },
+    });
+}
+
+export function useUnbanUser() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (userId: string) => adminService.unbanUser(userId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+        },
+    });
+}
+
 export function useCreateProduct() {
     const queryClient = useQueryClient();
     return useMutation({

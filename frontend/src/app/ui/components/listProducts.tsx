@@ -22,11 +22,29 @@ import { selectProduct } from '@/app/libs/stores/slices/products.slice';
 const MotionCard = motion(Card);
 const MotionGrid = motion(Grid);
 
-export default function ListProducts() {
-    const [page, setPage] = useState(1);
-    const limit = 10;
+interface ListProductsProps {
+    search?: string;
+    categoryId?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    sortBy?: string;
+    order?: 'asc' | 'desc';
+    showTitle?: boolean;
+}
 
-    const { data, isLoading } = useProducts(page, limit);
+export default function ListProducts({ 
+    search, 
+    categoryId, 
+    minPrice, 
+    maxPrice, 
+    sortBy, 
+    order,
+    showTitle = true 
+}: ListProductsProps) {
+    const [page, setPage] = useState(1);
+    const limit = 12;
+
+    const { data, isLoading } = useProducts(page, limit, search, categoryId, minPrice, maxPrice, sortBy, order);
     const dispatch = useDispatch();
 
     const containerVariants: Variants = {
@@ -62,14 +80,16 @@ export default function ListProducts() {
         return (
             <Container sx={{ py: 4 }}>
                 <Grid container spacing={3}>
-                    {[...Array(10)].map((_, i) => (
-                        <Grid size={{ xs: 12, sm: 6, md: 2.4 }} key={i}>
+                    {[...Array(limit)].map((_, i) => (
+                        <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i}>
                             <Skeleton 
                                 variant="rectangular" 
-                                height={350} 
-                                sx={{ borderRadius: 2, bgcolor: 'rgba(0,0,0,0.05)' }} 
+                                height={450} 
+                                sx={{ borderRadius: 0, bgcolor: 'rgba(0,0,0,0.03)' }} 
                                 animation="wave"
                             />
+                            <Skeleton width="60%" sx={{ mt: 2, mx: 'auto' }} />
+                            <Skeleton width="40%" sx={{ mt: 1, mx: 'auto' }} />
                         </Grid>
                     ))}
                 </Grid>
@@ -79,30 +99,32 @@ export default function ListProducts() {
 
     return (
      <Container sx={{ py: 6 }}>
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-        >
-            <Box sx={{ textAlign: 'center', mb: 10 }}>
-                <Typography 
-                    variant='h3' 
-                    sx={{ 
-                        fontFamily: 'var(--font-playfair)',
-                        fontWeight: 700,
-                        letterSpacing: '0.1em',
-                        mb: 2,
-                        textTransform: 'uppercase'
-                    }}
-                >
-                    Coleção Exclusiva
-                </Typography>
-                <Typography variant="body1" sx={{ color: 'text.secondary', letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: '0.75rem' }}>
-                    Peças selecionadas com o mais alto padrão de qualidade
-                </Typography>
-                <Box sx={{ width: 60, height: 2, bgcolor: 'primary.main', mx: 'auto', mt: 3 }} />
-            </Box>
-        </motion.div>
+        {showTitle && (
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+            >
+                <Box sx={{ textAlign: 'center', mb: 10 }}>
+                    <Typography 
+                        variant='h3' 
+                        sx={{ 
+                            fontFamily: 'var(--font-playfair)',
+                            fontWeight: 700,
+                            letterSpacing: '0.1em',
+                            mb: 2,
+                            textTransform: 'uppercase'
+                        }}
+                    >
+                        Coleção Exclusiva
+                    </Typography>
+                    <Typography variant="body1" sx={{ color: 'text.secondary', letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: '0.75rem' }}>
+                        Peças selecionadas com o mais alto padrão de qualidade
+                    </Typography>
+                    <Box sx={{ width: 60, height: 2, bgcolor: 'primary.main', mx: 'auto', mt: 3 }} />
+                </Box>
+            </motion.div>
+        )}
 
         <AnimatePresence mode='wait'>
             <MotionGrid 
@@ -208,29 +230,34 @@ export default function ListProducts() {
         </AnimatePresence>
 
         <Box display='flex' justifyContent='center' mt={12}>
-            <Pagination 
-                count={data?.meta ? Math.ceil(data.meta.total / data.meta.limit) : 0}
-                page={page}
-                onChange={(_, value) => {
-                    setPage(value);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                color='primary'
-                shape="rounded"
-                size="large"
-                sx={{
-                    '& .MuiPaginationItem-root': {
-                        borderRadius: 0,
-                        border: '1px solid transparent',
-                        '&.Mui-selected': {
-                            bgcolor: 'transparent',
-                            color: 'primary.main',
-                            border: '1px solid',
-                            borderColor: 'primary.main',
+            {data?.meta && data.meta.totalPages > 1 && (
+                <Pagination 
+                    count={data.meta.totalPages}
+                    page={page}
+                    onChange={(_, value) => {
+                        setPage(value);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    color='primary'
+                    shape="rounded"
+                    size="large"
+                    sx={{
+                        '& .MuiPaginationItem-root': {
+                            borderRadius: 0,
+                            border: '1px solid transparent',
+                            '&.Mui-selected': {
+                                bgcolor: 'transparent',
+                                color: 'primary.main',
+                                border: '1px solid',
+                                borderColor: 'primary.main',
+                            },
+                            '&:hover': {
+                                bgcolor: 'rgba(175, 148, 79, 0.05)',
+                            }
                         }
-                    }
-                }}
-            />
+                    }}
+                />
+            )}
         </Box>
      </Container>
     )
