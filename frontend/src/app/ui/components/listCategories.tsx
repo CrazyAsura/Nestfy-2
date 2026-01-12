@@ -118,18 +118,19 @@ export default function ListCategories() {
                                     variants={cardVariants}
                                     whileHover="hover"
                                     sx={{
-                                        borderRadius: '50%', // Estilo luxuoso com círculos para categorias
+                                        borderRadius: '50%',
                                         position: 'relative',
                                         cursor: 'pointer',
                                         overflow: 'hidden',
-                                        bgcolor: 'transparent',
+                                        bgcolor: 'background.paper',
                                         aspectRatio: '1/1',
-                                        transition: 'all 0.4s ease',
+                                        transition: 'all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1)',
                                         border: '1px solid',
                                         borderColor: 'divider',
+                                        boxShadow: '0 4px 15px rgba(0,0,0,0.02)',
                                         '&:hover': {
                                             borderColor: 'primary.main',
-                                            transform: 'scale(1.05)'
+                                            boxShadow: '0 10px 30px rgba(175, 148, 79, 0.15)',
                                         }
                                     }}
                                     elevation={0}
@@ -139,29 +140,35 @@ export default function ListCategories() {
                                             src={category.imageUrl || '/next.svg'}
                                             alt={category.name}
                                             fill
-                                            style={{ objectFit: 'cover', opacity: 0.8 }}
+                                            style={{ 
+                                                objectFit: 'cover', 
+                                                opacity: 0.9,
+                                                transition: 'transform 0.8s ease'
+                                            }}
                                         />
                                         <Box sx={{ 
                                             position: 'absolute', 
-                                            top: 0, 
+                                            bottom: 0, 
                                             left: 0, 
                                             width: '100%', 
-                                            height: '100%', 
-                                            bgcolor: 'rgba(0,0,0,0.3)',
+                                            height: '40%', 
+                                            background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
                                             display: 'flex',
-                                            alignItems: 'center',
+                                            alignItems: 'flex-end',
                                             justifyContent: 'center',
-                                            p: 2
+                                            pb: 3,
+                                            px: 2
                                         }}>
                                             <Typography 
                                                 variant='body2' 
                                                 sx={{ 
                                                     color: 'white',
-                                                    fontWeight: 600,
-                                                    letterSpacing: '0.1em',
+                                                    fontWeight: 700,
+                                                    letterSpacing: '0.15em',
                                                     textTransform: 'uppercase',
-                                                    fontSize: '0.7rem',
-                                                    textAlign: 'center'
+                                                    fontSize: '0.65rem',
+                                                    textAlign: 'center',
+                                                    textShadow: '0 2px 4px rgba(0,0,0,0.3)'
                                                 }}
                                             >
                                                 {category.name}

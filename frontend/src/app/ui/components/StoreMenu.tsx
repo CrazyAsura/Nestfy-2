@@ -100,56 +100,135 @@ export function StoreMenu() {
           backgroundImage: 'none'
         }}
       >
-        <Toolbar sx={{ justifyContent: 'space-between' }}>
+        <Toolbar sx={{ justifyContent: 'space-between', height: 90 }}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <IconButton
               edge="start"
               color="inherit"
               onClick={toggleDrawer(true)}
-              sx={{ mr: 2 }}
+              sx={{ mr: 3 }}
               component={motion.button}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
             >
-              <MenuIcon />
+              <MenuIcon sx={{ fontSize: 28 }} />
             </IconButton>
             <Typography
-              variant="h5"
+              variant="h4"
               component={Link}
               href="/"
               sx={{
                 textDecoration: 'none',
                 color: 'inherit',
-                fontWeight: 700,
+                fontWeight: 800,
                 fontFamily: 'var(--font-playfair)',
-                letterSpacing: '0.2em',
+                letterSpacing: '0.3em',
                 background: 'linear-gradient(45deg, #AF944F 30%, #D4AF37 90%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
+                display: { xs: 'none', sm: 'block' }
               }}
             >
               NESTFY
             </Typography>
           </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 3, mr: 4 }}>
-              <Typography component={Link} href="/" sx={{ textDecoration: 'none', color: 'text.primary', fontSize: '0.8rem', letterSpacing: '0.1em', fontWeight: 500, '&:hover': { color: 'primary.main' } }}>HOME</Typography>
-              <Typography component={Link} href="/categories" sx={{ textDecoration: 'none', color: 'text.primary', fontSize: '0.8rem', letterSpacing: '0.1em', fontWeight: 500, '&:hover': { color: 'primary.main' } }}>COLEÇÕES</Typography>
-              {user && <Typography component={Link} href="/orders" sx={{ textDecoration: 'none', color: 'text.primary', fontSize: '0.8rem', letterSpacing: '0.1em', fontWeight: 500, '&:hover': { color: 'primary.main' } }}>PEDIDOS</Typography>}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 4, mr: 6 }}>
+              {[
+                { label: 'HOME', href: '/' },
+                { label: 'COLEÇÕES', href: '/categories' },
+                { label: 'PRODUTOS', href: '/products' },
+                ...(user ? [{ label: 'PEDIDOS', href: '/orders' }] : [])
+              ].map((item) => (
+                <Typography 
+                  key={item.label}
+                  component={Link} 
+                  href={item.href} 
+                  sx={{ 
+                    textDecoration: 'none', 
+                    color: 'text.primary', 
+                    fontSize: '0.75rem', 
+                    letterSpacing: '0.2em', 
+                    fontWeight: 600, 
+                    position: 'relative',
+                    '&::after': {
+                      content: '""',
+                      position: 'absolute',
+                      bottom: -4,
+                      left: 0,
+                      width: 0,
+                      height: '1px',
+                      bgcolor: 'primary.main',
+                      transition: 'width 0.3s ease'
+                    },
+                    '&:hover': { 
+                      color: 'primary.main',
+                      '&::after': { width: '100%' }
+                    } 
+                  }}
+                >
+                  {item.label}
+                </Typography>
+              ))}
             </Box>
-            <IconButton
-              color="inherit"
-              onClick={() => setCartOpen(true)}
-              component={motion.button}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <Badge badgeContent={totalItems} color="primary" sx={{ '& .MuiBadge-badge': { borderRadius: 0 } }}>
-                <ShoppingCartIcon />
-              </Badge>
-            </IconButton>
-            <ThemeToggle />
+            
+            <Stack direction="row" spacing={1} alignItems="center">
+              <IconButton
+                color="inherit"
+                onClick={() => setCartOpen(true)}
+                component={motion.button}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                sx={{ p: 1.5 }}
+              >
+                <Badge 
+                  badgeContent={totalItems} 
+                  color="primary" 
+                  sx={{ 
+                    '& .MuiBadge-badge': { 
+                      borderRadius: 0,
+                      fontSize: '0.6rem',
+                      height: 16,
+                      minWidth: 16
+                    } 
+                  }}
+                >
+                  <ShoppingCartIcon sx={{ fontSize: 24 }} />
+                </Badge>
+              </IconButton>
+              
+              <Box sx={{ ml: 1 }}>
+                <ThemeToggle />
+              </Box>
+
+              {user ? (
+                <IconButton
+                  component={Link}
+                  href="/profile"
+                  color="inherit"
+                  sx={{ p: 1.5 }}
+                >
+                   <PersonIcon sx={{ fontSize: 24 }} />
+                </IconButton>
+              ) : (
+                <Button
+                  component={Link}
+                  href="/login"
+                  variant="outlined"
+                  size="small"
+                  sx={{ 
+                    ml: 2, 
+                    px: 3, 
+                    py: 1, 
+                    fontSize: '0.7rem',
+                    display: { xs: 'none', sm: 'inline-flex' }
+                  }}
+                >
+                  LOGIN
+                </Button>
+              )}
+            </Stack>
           </Box>
         </Toolbar>
       </MotionAppBar>

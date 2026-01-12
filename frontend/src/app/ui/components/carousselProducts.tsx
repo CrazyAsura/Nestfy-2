@@ -165,14 +165,19 @@ export default function CarousselProducts() {
                   whileHover="hover"
                   sx={{
                     borderRadius: 0,
-                    border: 'none',
+                    border: '1px solid',
+                    borderColor: 'transparent',
                     position: 'relative',
                     cursor: 'pointer',
                     overflow: 'hidden',
-                    bgcolor: 'transparent',
+                    bgcolor: 'background.paper',
                     height: '100%',
                     display: 'flex',
-                    flexDirection: 'column'
+                    flexDirection: 'column',
+                    transition: 'all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1)',
+                    '&:hover': {
+                        borderColor: 'rgba(175, 148, 79, 0.3)',
+                    }
                   }}
                   elevation={0}
                 >
@@ -180,16 +185,16 @@ export default function CarousselProducts() {
                     <Box
                       sx={{
                         position: 'absolute',
-                        top: 0,
-                        left: 0,
+                        top: 12,
+                        right: 12,
                         backgroundColor: 'primary.main',
                         color: 'white',
-                        fontWeight: 600,
+                        fontWeight: 700,
                         zIndex: 2,
                         px: 1.5,
                         py: 0.5,
-                        fontSize: '0.7rem',
-                        letterSpacing: '0.1em'
+                        fontSize: '0.65rem',
+                        letterSpacing: '0.15em'
                       }}
                     >
                       -{discount}%
@@ -199,8 +204,8 @@ export default function CarousselProducts() {
                   <Box sx={{ 
                     overflow: 'hidden', 
                     position: 'relative', 
-                    height: '400px',
-                    mb: 2
+                    height: '350px',
+                    bgcolor: '#f9f9f9'
                   }}>
                     <MotionImage
                       src={product.imageUrl || product.images?.[0]?.url || '/next.svg'}
@@ -209,7 +214,7 @@ export default function CarousselProducts() {
                       height={400}
                       variants={{
                         hover: { 
-                            scale: 1.1
+                            scale: 1.08
                         }
                       }}
                       transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1] }}
@@ -217,26 +222,46 @@ export default function CarousselProducts() {
                     />
                   </Box>
 
-                  <CardContent sx={{ p: 0, textAlign: 'center' }}>
+                  <CardContent sx={{ p: 3, textAlign: 'left', flexGrow: 1 }}>
                     <Typography 
-                      variant="body2" 
+                      variant="caption" 
                       sx={{ 
-                        fontWeight: 500, 
-                        letterSpacing: '0.05em', 
+                        fontWeight: 600, 
+                        letterSpacing: '0.2em', 
                         textTransform: 'uppercase',
                         mb: 1,
-                        color: 'text.primary'
+                        color: 'primary.main',
+                        display: 'block'
+                      }}
+                    >
+                      {product.brand?.name || 'Exclusive'}
+                    </Typography>
+                    <Typography 
+                      variant="body1" 
+                      sx={{ 
+                        fontWeight: 500, 
+                        letterSpacing: '0.02em', 
+                        mb: 2,
+                        color: 'text.primary',
+                        fontSize: '0.9rem',
+                        height: '2.8em',
+                        overflow: 'hidden',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
                       }}
                     >
                       {product.name}
                     </Typography>
-                    <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, alignItems: 'center' }}>
-                      <Typography variant="body1" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mt: 'auto' }}>
+                      <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary', fontSize: '1.1rem' }}>
                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.discountPrice ?? product.price)}
                       </Typography>
-                      <Typography variant="caption" sx={{ textDecoration: 'line-through', color: 'text.disabled' }}>
-                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
-                      </Typography>
+                      {discount > 0 && (
+                        <Typography variant="caption" sx={{ textDecoration: 'line-through', color: 'text.disabled', fontSize: '0.8rem' }}>
+                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
+                        </Typography>
+                      )}
                     </Box>
                   </CardContent>
                 </MotionCard>
