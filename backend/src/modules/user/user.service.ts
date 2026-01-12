@@ -39,12 +39,12 @@ export class UserService {
   }
 
   async findByEmail(email: string) {
-    return this.userModel.findOne({ email: email.trim().toLowerCase() }).exec();
+    return this.userModel.findOne({ email: email.trim().toLowerCase(), deletedAt: null }).exec();
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.userModel.findById(id).exec();
-    if (!user) throw new BadRequestException('Usuário não encontrado');
+    if (!user || user.deletedAt) throw new BadRequestException('Usuário não encontrado');
 
     const dataToUpdate: any = { ...updateUserDto };
     
@@ -64,7 +64,15 @@ export class UserService {
     return this.userModel.findByIdAndUpdate(id, dataToUpdate, { new: true }).exec();
   }
 
+  async ban(id: string) {
+    return this.userModel.findByIdAndUpdate(id, { isBanned: true }, { new: true }).exec();
+  }
+
+  async unban(id: string) {
+    return this.userModel.findByIdAndUpdate(id, { isBanned: false }, { new: true }).exec();
+  }
+
   async remove(id: string) {
-    return this.userModel.findByIdAndDelete(id).exec();
+    return this.userModel.findByIdAndUpdate(id, { deletedAt: new Date(), isActive: false }, { new: true }).exec();
   }
 }

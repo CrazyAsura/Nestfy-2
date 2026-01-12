@@ -124,6 +124,16 @@ export class AdminService {
     return { success: true };
   }
 
+  async banUser(userId: string) {
+    await this.userModel.findByIdAndUpdate(userId, { isBanned: true }).exec();
+    return { success: true };
+  }
+
+  async unbanUser(userId: string) {
+    await this.userModel.findByIdAndUpdate(userId, { isBanned: false }).exec();
+    return { success: true };
+  }
+
   async getUserHistoric(userId: string) {
     return this.orderModel.find({ userId })
       .sort({ createdAt: -1 })

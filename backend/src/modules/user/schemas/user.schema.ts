@@ -40,6 +40,12 @@ export class User {
   @Prop({ type: Boolean, default: true })
   isActive: boolean;
 
+  @Prop({ type: Boolean, default: false })
+  isBanned: boolean;
+
+  @Prop({ type: String, default: null })
+  lastIp: string;
+
   @Prop({ type: Date, default: null })
   deletedAt: Date | null;
 }

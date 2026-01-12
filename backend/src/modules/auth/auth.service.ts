@@ -285,13 +285,24 @@ export class AuthService {
     }).exec();
 
     if (existingUser) {
-      if (existingUser.email === email) {
-        throw new BadRequestException({ code: 'email_already_exists', message: 'Email já está em uso' });
+      if (existingUser.deletedAt) {
+        // Se o usuário foi "removido" (soft delete), permitimos criar de novo
+        // mas precisamos limpar o email/documento do antigo para não dar conflito se for o mesmo
+        // ou simplesmente atualizar o antigo. Por segurança, vamos apenas tratar como se não existisse
+        // se o email for o mesmo. No MongoDB, unique index impede duplicados.
+        // O ideal é remover permanentemente ou mudar o email do antigo.
+      } else {
+        if (existingUser.isBanned) {
+          throw new BadRequestException({ code: 'user_banned', message: 'Este usuário está banido permanentemente.' });
+        }
+        if (existingUser.email === email) {
+          throw new BadRequestException({ code: 'email_already_exists', message: 'Email já está em uso' });
+        }
+        if (existingUser.document === document) {
+          throw new BadRequestException({ code: 'document_already_exists', message: 'Documento já está em uso' });
+        }
+        throw new BadRequestException('Email ou documento já está em uso');
       }
-      if (existingUser.document === document) {
-        throw new BadRequestException({ code: 'document_already_exists', message: 'Documento já está em uso' });
-      }
-      throw new BadRequestException('Email ou documento já está em uso');
     }
 
     const hashedPassword = await argon.hash(password);
@@ -379,7 +390,7 @@ export class AuthService {
     ).exec();
   }
 
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto, ip?: string) {
     const { email, password } = loginDto;
     
     if (!email) {
@@ -400,9 +411,14 @@ export class AuthService {
 
       this.logger.log(`[DEBUG LOGIN] Usuário encontrado: ID=${user.id}, Email=${user.email}, Role=${user.role}, Ativo=${user.isActive}, Deletado=${!!user.deletedAt}`);
 
-      if (!user.isActive) {
+      if (!user.isActive && !user.deletedAt) {
         this.logger.warn(`[DEBUG LOGIN] Conta desativada: ${email}`);
         throw new UnauthorizedException('Esta conta está desativada. Entre em contato com o suporte.');
+      }
+
+      if (user.isBanned) {
+        this.logger.warn(`[DEBUG LOGIN] Usuário banido tentou logar: ${email}`);
+        throw new UnauthorizedException('Esta conta foi banida permanentemente.');
       }
 
       // Logar o tamanho da senha no banco para conferência (sem logar o hash)
@@ -412,6 +428,11 @@ export class AuthService {
         this.logger.error(`[DEBUG LOGIN] Erro técnico no argon.verify para ${email}: ${err.message}`, err.stack);
         throw new InternalServerErrorException(`Erro na verificação de segurança: ${err.message}`);
       });
+
+      if (isPasswordValid && ip) {
+        // Atualizar IP no login
+        await this.userModel.findByIdAndUpdate(user.id, { lastIp: ip }).exec();
+      }
 
       if (!isPasswordValid) {
         this.logger.warn(`[DEBUG LOGIN] Senha incorreta para o usuário: ${email}`);

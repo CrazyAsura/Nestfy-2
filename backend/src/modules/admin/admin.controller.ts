@@ -58,6 +58,16 @@ export class AdminController {
     return this.adminService.deleteUser(id); 
   }
 
+  @Patch('users/:id/ban')
+  banUser(@Param('id') id: string) {
+    return this.adminService.banUser(id);
+  }
+
+  @Patch('users/:id/unban')
+  unbanUser(@Param('id') id: string) {
+    return this.adminService.unbanUser(id);
+  }
+
   @Get('users/:id/historic')
   getUserHistoric(@Param('id') id: string) { 
     return this.adminService.getUserHistoric(id); 

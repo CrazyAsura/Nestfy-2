@@ -8,7 +8,9 @@ import {
   UseInterceptors,
   UploadedFile,
   HttpCode,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
@@ -65,8 +67,9 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(200)
-  login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  login(@Body() loginDto: LoginDto, @Req() req: Request) {
+    const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    return this.authService.login(loginDto, typeof ip === 'string' ? ip : undefined);
   }
 
   @UseGuards(JwtAuthGuard)
