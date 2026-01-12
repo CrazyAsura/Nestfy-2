@@ -173,11 +173,14 @@ export default function RegisterForm () {
 
     const onSubmit = (data: RegisterFormData) => {
         setSubmitError(null);
+        
         console.log('Dados enviados para registro:', {
             ...data,
             password: '[REDACTED]',
-            confirmPassword: '[REDACTED]'
+            confirmPassword: '[REDACTED]',
+            privacyPolicy: '[CHECKED]'
         });
+
         registerUser(data, {
             onSuccess: () => {
                 console.log('Registro bem-sucedido no frontend!');

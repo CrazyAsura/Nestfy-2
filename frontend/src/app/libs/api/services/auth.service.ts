@@ -5,11 +5,14 @@ import { api } from './axios';
 import { API_ROUTES } from '../routes';
 
 export const registerRequest = async (data: any) => {
-    const endpoint = data.userType === 'INDIVIDUAL'
+    // Remove privacyPolicy as it's only for frontend validation and might cause errors in the backend DTO
+    const { privacyPolicy, ...payload } = data;
+
+    const endpoint = payload.userType === 'INDIVIDUAL'
     ? API_ROUTES.AUTH.REGISTER_PF
     : API_ROUTES.AUTH.REGISTER_PJ;
 
-    const response = await api.post(endpoint, data);
+    const response = await api.post(endpoint, payload);
     return response.data;
 }
 
