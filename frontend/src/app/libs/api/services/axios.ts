@@ -1,11 +1,9 @@
 import axios from "axios";
 import { store } from "../../stores";
 
-const getBaseURL = () => {
-    // 1. Tenta pegar da variável de ambiente (Vercel/Local)
+export const getSocketBaseURL = () => {
     let apiUrl = process.env.NEXT_PUBLIC_API_URL;
     
-    // 2. Se estiver em produção e a variável estiver vazia, usa o domínio do Railway diretamente
     if (!apiUrl && typeof window !== 'undefined' && !window.location.hostname.includes('localhost')) {
         apiUrl = 'https://nestfy-2-production.up.railway.app';
     }
@@ -15,12 +13,16 @@ const getBaseURL = () => {
         if (!normalizedUrl.startsWith('http')) {
             normalizedUrl = `https://${normalizedUrl}`;
         }
-        const urlWithSlash = normalizedUrl.endsWith('/') ? normalizedUrl : `${normalizedUrl}/`;
-        return urlWithSlash.includes('/api/') ? urlWithSlash : `${urlWithSlash}api/`;
+        return normalizedUrl.endsWith('/') ? normalizedUrl.slice(0, -1) : normalizedUrl;
     }
 
-    // 3. Fallback para desenvolvimento local (Proxy do Next.js)
-    return typeof window !== 'undefined' ? '/api/' : 'http://localhost:8080/api/';
+    return 'http://localhost:8080';
+};
+
+export const getBaseURL = () => {
+    const socketUrl = getSocketBaseURL();
+    const urlWithSlash = socketUrl.endsWith('/') ? socketUrl : `${socketUrl}/`;
+    return urlWithSlash.includes('/api/') ? urlWithSlash : `${urlWithSlash}api/`;
 };
 
 export const api = axios.create({

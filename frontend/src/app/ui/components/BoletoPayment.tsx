@@ -12,7 +12,7 @@ import { Print, Download, ContentCopy, ShoppingBag, CheckCircle } from '@mui/ico
 import { useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Barcode from 'react-barcode'; // Biblioteca adicionada
-import { api } from '@/app/libs/api/services/axios';
+import { api, getBaseURL } from '@/app/libs/api/services/axios';
 import { API_ROUTES } from '@/app/libs/api/routes';
 
 interface BoletoPaymentProps {
@@ -60,7 +60,7 @@ export default function BoletoPayment({ amount, orderId }: BoletoPaymentProps) {
 
     const handleDownloadPDF = async () => {
         // Implementação ideal: Chamar endpoint que retorna o PDF binário
-        window.open(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/finance/boleto/${orderId}`, '_blank');
+        window.open(`${getBaseURL()}/finance/boleto/${orderId}`, '_blank');
     };
 
     const handleCopyBarcode = async () => {

@@ -21,6 +21,7 @@ import { Chat, Close, Send, SmartToy, Person, FiberManualRecord } from '@mui/ico
 import { io, Socket } from 'socket.io-client';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/app/libs/stores';
+import { getSocketBaseURL } from '@/app/libs/api/services/axios';
 
 interface Message {
     id: string;
@@ -48,7 +49,7 @@ export default function Chatbot() {
 
     useEffect(() => {
         // Inicializa o socket
-        const socketUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const socketUrl = getSocketBaseURL();
         const socket = io(socketUrl, {
             withCredentials: true,
             transports: ['websocket', 'polling']

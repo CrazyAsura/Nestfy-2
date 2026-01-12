@@ -6,72 +6,48 @@ import {
     Box, 
     Paper, 
     Divider, 
-    Stack,
-    IconButton
+    Stack 
 } from '@mui/material';
 import { 
-    Shield, 
-    Lock, 
-    Visibility, 
-    Person, 
-    ContactSupport,
+    Gavel, 
+    Assignment, 
+    VerifiedUser, 
+    LocalShipping, 
+    Payment,
     ArrowBack
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
-const privacySections = [
+const termSections = [
     {
-        title: '1. Introdução',
-        icon: <Shield />,
-        content: 'A NESTFY está profundamente comprometida com a transparência e a segurança dos seus dados pessoais. Esta Política de Privacidade detalha como coletamos, processamos e protegemos suas informações, em total conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018). Nosso objetivo é garantir que sua experiência de luxo seja acompanhada pela mais alta segurança digital.'
+        title: '1. Aceitação dos Termos',
+        icon: <VerifiedUser />,
+        content: 'Ao acessar e utilizar a plataforma NESTFY, você concorda expressamente com os presentes Termos de Serviço. Estes termos regem o uso de nossa loja online e todos os serviços relacionados. Caso não concorde com qualquer parte destes termos, recomendamos que não utilize nossos serviços.'
     },
     {
-        title: '2. Coleta de Dados',
-        icon: <Person />,
-        content: 'Para oferecer um serviço personalizado e exclusivo, coletamos apenas os dados estritamente necessários:',
-        items: [
-            'Dados de identificação: Nome completo, CPF e data de nascimento.',
-            'Dados de contato: Endereço de e-mail, telefone e endereço de entrega.',
-            'Dados de navegação: Endereço IP, cookies e histórico de preferências, visando otimizar sua jornada em nossa plataforma.'
-        ]
+        title: '2. Cadastro e Conta',
+        icon: <Assignment />,
+        content: 'Para realizar compras, o usuário deverá criar uma conta fornecendo informações precisas e atualizadas. A segurança da senha é de inteira responsabilidade do usuário. A NESTFY reserva-se o direito de suspender contas que violem nossas políticas ou apresentem atividades suspeitas.'
     },
     {
-        title: '3. Finalidade do Tratamento',
-        icon: <Visibility />,
-        content: 'O tratamento de seus dados pessoais tem finalidades específicas e legítimas:',
-        items: [
-            'Gestão e processamento de pedidos e transações financeiras.',
-            'Logística de entrega de produtos adquiridos.',
-            'Comunicações personalizadas sobre novos lançamentos e eventos exclusivos.',
-            'Prevenção contra fraudes e garantia da integridade da sua conta.',
-            'Cumprimento de obrigações fiscais e regulatórias.'
-        ]
+        title: '3. Política de Preços e Pagamentos',
+        icon: <Payment />,
+        content: 'Os preços exibidos em nosso site estão sujeitos a alterações sem aviso prévio. O fechamento do pedido garante o preço vigente no momento da compra. Aceitamos diversas formas de pagamento, processadas através de gateways seguros. A entrega do produto está condicionada à confirmação do pagamento.'
     },
     {
-        title: '4. Segurança da Informação',
-        icon: <Lock />,
-        content: 'Utilizamos tecnologias de ponta e protocolos rigorosos de segurança, incluindo criptografia SSL/TLS e firewalls avançados. Seus dados são armazenados em ambientes controlados e seguros, acessíveis apenas por pessoal autorizado sob estrito dever de confidencialidade.'
+        title: '4. Entregas e Prazos',
+        icon: <LocalShipping />,
+        content: 'Os prazos de entrega são estimativas fornecidas por nossos parceiros logísticos e começam a contar a partir da confirmação do pagamento. Não nos responsabilizamos por atrasos decorrentes de fatores externos (greves, condições climáticas ou erros no endereço fornecido pelo cliente).'
     },
     {
-        title: '5. Seus Direitos (LGPD)',
-        icon: <Shield />,
-        content: 'Como titular dos dados, você possui direitos inalienáveis garantidos pela legislação brasileira:',
-        items: [
-            'Confirmação da existência de tratamento e acesso aos dados.',
-            'Correção de dados incompletos, inexatos ou desatualizados.',
-            'Eliminação de dados pessoais tratados com o seu consentimento.',
-            'Revogação do consentimento a qualquer momento, mediante solicitação.'
-        ]
-    },
-    {
-        title: '6. Contato e Suporte',
-        icon: <ContactSupport />,
-        content: 'Para exercer seus direitos ou esclarecer qualquer dúvida sobre nossa gestão de dados, nosso encarregado de proteção de dados (DPO) está à sua disposição através do canal exclusivo: privacidade@nestfy.com.br'
+        title: '5. Propriedade Intelectual',
+        icon: <Gavel />,
+        content: 'Todo o conteúdo disponível na NESTFY, incluindo logos, textos, imagens e design, é de propriedade exclusiva da NESTFY ou de seus licenciantes. É proibida a reprodução, cópia ou uso não autorizado de qualquer material sem consentimento prévio por escrito.'
     }
 ];
 
-export default function PrivacyPolicyPage() {
+export default function TermsOfServicePage() {
     return (
         <Box sx={{ 
             minHeight: '100vh',
@@ -104,10 +80,10 @@ export default function PrivacyPolicyPage() {
                                 letterSpacing: 4
                             }}
                         >
-                            Política de Privacidade
+                            Termos de Serviço
                         </Typography>
                         <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', letterSpacing: 1 }}>
-                            Última atualização: 12 de Janeiro de 2026
+                            Vigente a partir de: 12 de Janeiro de 2026
                         </Typography>
                     </Box>
 
@@ -120,7 +96,7 @@ export default function PrivacyPolicyPage() {
                         boxShadow: '0 20px 40px rgba(0,0,0,0.4)'
                     }}>
                         <Stack spacing={6}>
-                            {privacySections.map((section, index) => (
+                            {termSections.map((section, index) => (
                                 <Box key={index}>
                                     <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3 }}>
                                         <Box sx={{ 
@@ -141,32 +117,11 @@ export default function PrivacyPolicyPage() {
                                         </Typography>
                                     </Stack>
 
-                                    <Typography sx={{ color: 'rgba(255,255,255,0.7)', lineHeight: 1.8, mb: section.items ? 2 : 0 }}>
+                                    <Typography sx={{ color: 'rgba(255,255,255,0.7)', lineHeight: 1.8 }}>
                                         {section.content}
                                     </Typography>
-
-                                    {section.items && (
-                                        <Box component="ul" sx={{ 
-                                            pl: 3, 
-                                            m: 0,
-                                            '& li': {
-                                                color: 'rgba(255,255,255,0.6)',
-                                                mb: 1.5,
-                                                lineHeight: 1.6,
-                                                '&::marker': {
-                                                    color: '#AF944F'
-                                                }
-                                            }
-                                        }}>
-                                            {section.items.map((item, iIndex) => (
-                                                <li key={iIndex}>
-                                                    <Typography variant="body2">{item}</Typography>
-                                                </li>
-                                            ))}
-                                        </Box>
-                                    )}
                                     
-                                    {index !== privacySections.length - 1 && (
+                                    {index !== termSections.length - 1 && (
                                         <Divider sx={{ mt: 6, borderColor: 'rgba(255,255,255,0.05)' }} />
                                     )}
                                 </Box>

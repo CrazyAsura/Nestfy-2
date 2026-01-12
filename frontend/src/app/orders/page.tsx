@@ -24,6 +24,7 @@ import {
     ShoppingBag as ShoppingBagIcon
 } from '@mui/icons-material';
 import { useOrders } from '@/app/libs/hooks/useOrders';
+import { getBaseURL } from '@/app/libs/api/services/axios';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import Link from 'next/link';
@@ -235,7 +236,7 @@ export default function OrdersPage() {
                                                 variant="outlined" 
                                                 color="primary"
                                                 startIcon={<ReceiptIcon />}
-                                                onClick={() => window.open(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/finance/invoice/${order.id}`, '_blank')}
+                                                onClick={() => window.open(`${getBaseURL()}/finance/invoice/${order.id}`, '_blank')}
                                                 sx={{ borderRadius: 2, fontWeight: 700 }}
                                             >
                                                 Ver Nota Fiscal

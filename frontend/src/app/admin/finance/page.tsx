@@ -28,6 +28,7 @@ import {
     Download,
     Info
 } from '@mui/icons-material';
+import { getBaseURL } from '@/app/libs/api/services/axios';
 import { useFinanceStats } from '@/app/libs/hooks/useFinance';
 import { 
     LineChart, 
@@ -219,7 +220,7 @@ export default function FinancePage() {
                                                 <TableCell align="right">
                                                     <IconButton 
                                                         color="primary"
-                                                        onClick={() => window.open(`http://localhost:3001/finance/invoice/${invoice.orderId}`, '_blank')}
+                                                        onClick={() => window.open(`${getBaseURL()}/finance/invoice/${invoice.orderId}`, '_blank')}
                                                     >
                                                         <Download />
                                                     </IconButton>
