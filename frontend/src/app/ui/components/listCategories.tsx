@@ -77,93 +77,112 @@ export default function ListCategories() {
     }
 
     return (
-      <Container sx={{ py: 6 }}>
+      <Container sx={{ py: 10 }}>
              <motion.div
-                 initial={{ opacity: 0, x: -20 }}
-                 animate={{ opacity: 1, x: 0 }}
-                 transition={{ duration: 0.6 }}
+                 initial={{ opacity: 0, y: 20 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ duration: 0.8 }}
              >
-                 <Typography 
-                    variant='h4' 
-                    fontWeight={900} 
-                    mb={4} 
-                    textTransform="uppercase"
-                    sx={{ letterSpacing: '0.02em' }}
-                >
-                    📁 Nossas Categorias
-                </Typography>
+                <Box sx={{ mb: 6, textAlign: 'center' }}>
+                    <Typography 
+                        variant='h4' 
+                        sx={{ 
+                            fontFamily: 'var(--font-playfair)',
+                            fontWeight: 700,
+                            letterSpacing: '0.1em',
+                            textTransform: 'uppercase',
+                            mb: 2
+                        }}
+                    >
+                        Nossas Categorias
+                    </Typography>
+                    <Box sx={{ width: 40, height: 1, bgcolor: 'primary.main', mx: 'auto' }} />
+                </Box>
              </motion.div>
      
              <AnimatePresence mode='wait'>
                  <MotionGrid 
                 container 
-                spacing={3}
+                spacing={4}
                 key={page}
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
+                sx={{ justifyContent: 'center' }}
             >
                 {data?.data && data.data.length > 0 ? (
                     data.data.map((category: Category) => (
-                        <Grid size={{ xs: 12, sm: 6, md: 2.4 }} key={category.id}>
+                        <Grid size={{ xs: 6, sm: 4, md: 2 }} key={category.id}>
                             <Link href={`/categories/${category.id}`} style={{ textDecoration: 'none' }}>
                                 <MotionCard
                                     variants={cardVariants}
                                     whileHover="hover"
                                     sx={{
-                                        borderRadius: 2,
-                                        border: '1px solid rgba(0,0,0,0.1)',
+                                        borderRadius: '50%', // Estilo luxuoso com círculos para categorias
                                         position: 'relative',
                                         cursor: 'pointer',
                                         overflow: 'hidden',
-                                        bgcolor: 'background.paper',
-                                        height: '100%',
-                                        transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
+                                        bgcolor: 'transparent',
+                                        aspectRatio: '1/1',
+                                        transition: 'all 0.4s ease',
+                                        border: '1px solid',
+                                        borderColor: 'divider',
                                         '&:hover': {
                                             borderColor: 'primary.main',
-                                            boxShadow: '0 12px 24px rgba(0,0,0,0.1)'
+                                            transform: 'scale(1.05)'
                                         }
                                     }}
                                     elevation={0}
                                 >
-                                    <Box sx={{ position: 'relative', height: 160, overflow: 'hidden' }}>
+                                    <Box sx={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
                                         <Image
                                             src={category.imageUrl || '/next.svg'}
                                             alt={category.name}
                                             fill
-                                            style={{ objectFit: 'cover' }}
+                                            style={{ objectFit: 'cover', opacity: 0.8 }}
                                         />
+                                        <Box sx={{ 
+                                            position: 'absolute', 
+                                            top: 0, 
+                                            left: 0, 
+                                            width: '100%', 
+                                            height: '100%', 
+                                            bgcolor: 'rgba(0,0,0,0.3)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            p: 2
+                                        }}>
+                                            <Typography 
+                                                variant='body2' 
+                                                sx={{ 
+                                                    color: 'white',
+                                                    fontWeight: 600,
+                                                    letterSpacing: '0.1em',
+                                                    textTransform: 'uppercase',
+                                                    fontSize: '0.7rem',
+                                                    textAlign: 'center'
+                                                }}
+                                            >
+                                                {category.name}
+                                            </Typography>
+                                        </Box>
                                     </Box>
-        
-                                    <CardContent sx={{ p: 2 }}>
-                                        <Typography 
-                                            variant='h6' 
-                                            fontWeight="bold"
-                                            textAlign="center"
-                                            sx={{ 
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis',
-                                                whiteSpace: 'nowrap'
-                                            }}
-                                        >
-                                            {category.name}
-                                        </Typography>
-                                    </CardContent>
                                 </MotionCard>
                             </Link>
                         </Grid>
                     ))
                 ) : (
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="body1" textAlign="center" color="text.secondary">
-                            Nenhuma categoria encontrada.
+                        <Typography variant="body1" textAlign="center" color="text.secondary" sx={{ letterSpacing: '0.1em' }}>
+                            NENHUMA CATEGORIA ENCONTRADA.
                         </Typography>
                     </Grid>
                 )}
             </MotionGrid>
              </AnimatePresence>
      
-             <Box display='flex' justifyContent='center' mt={8}>
+             <Box display='flex' justifyContent='center' mt={10}>
                  <Pagination 
                      count={data?.meta ? Math.ceil(data.meta.total / data.meta.limit) : 0}
                      page={page}
@@ -172,12 +191,13 @@ export default function ListCategories() {
                          window.scrollTo({ top: 0, behavior: 'smooth' });
                      }}
                      color='primary'
-                     size="large"
+                     shape="rounded"
+                     size="small"
                      sx={{
-                         '& .MuiPaginationItem-root': {
-                             fontWeight: 'bold',
-                             borderRadius: 2
-                         }
+                        '& .MuiPaginationItem-root': {
+                            borderRadius: 0,
+                            fontSize: '0.7rem'
+                        }
                      }}
                  />
              </Box>

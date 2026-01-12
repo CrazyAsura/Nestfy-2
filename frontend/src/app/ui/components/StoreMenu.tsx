@@ -114,30 +114,38 @@ export function StoreMenu() {
               <MenuIcon />
             </IconButton>
             <Typography
-              variant="h6"
+              variant="h5"
               component={Link}
               href="/"
               sx={{
                 textDecoration: 'none',
                 color: 'inherit',
-                fontWeight: 800,
-                letterSpacing: '-0.5px'
+                fontWeight: 700,
+                fontFamily: 'var(--font-playfair)',
+                letterSpacing: '0.2em',
+                background: 'linear-gradient(45deg, #AF944F 30%, #D4AF37 90%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
               }}
             >
-              LOJA VIRTUAL
+              NESTFY
             </Typography>
           </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 3, mr: 4 }}>
+              <Typography component={Link} href="/" sx={{ textDecoration: 'none', color: 'text.primary', fontSize: '0.8rem', letterSpacing: '0.1em', fontWeight: 500, '&:hover': { color: 'primary.main' } }}>HOME</Typography>
+              <Typography component={Link} href="/categories" sx={{ textDecoration: 'none', color: 'text.primary', fontSize: '0.8rem', letterSpacing: '0.1em', fontWeight: 500, '&:hover': { color: 'primary.main' } }}>COLEÇÕES</Typography>
+              {user && <Typography component={Link} href="/orders" sx={{ textDecoration: 'none', color: 'text.primary', fontSize: '0.8rem', letterSpacing: '0.1em', fontWeight: 500, '&:hover': { color: 'primary.main' } }}>PEDIDOS</Typography>}
+            </Box>
             <IconButton
               color="inherit"
               onClick={() => setCartOpen(true)}
-              sx={{ mr: 1 }}
               component={motion.button}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
             >
-              <Badge badgeContent={totalItems} color="primary">
+              <Badge badgeContent={totalItems} color="primary" sx={{ '& .MuiBadge-badge': { borderRadius: 0 } }}>
                 <ShoppingCartIcon />
               </Badge>
             </IconButton>
@@ -156,52 +164,70 @@ export function StoreMenu() {
         onClose={toggleDrawer(false)}
         PaperProps={{
           sx: {
-            bgcolor: 'background.paper',
+            bgcolor: 'background.default',
             color: 'text.primary',
-            width: 280,
+            width: 320,
             overflowX: 'hidden',
-            backgroundImage: 'none'
+            backgroundImage: 'none',
+            borderRadius: 0,
+            p: 4
           }
         }}
       >
         <MotionBox 
-          sx={{ p: 2 }}
           variants={menuVariants}
           initial="hidden"
           animate={open ? "visible" : "hidden"}
         >
           <Typography 
-            variant="h5" 
-            sx={{ fontWeight: 900, mb: 2 }}
+            variant="h4" 
+            sx={{ 
+              fontWeight: 700, 
+              mb: 6, 
+              fontFamily: 'var(--font-playfair)',
+              letterSpacing: '0.1em'
+            }}
           >
-            MENU
+            NESTFY
           </Typography>
 
-          <List>
+          <List sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <AnimatePresence>
               {/* HOME */}
               <MotionListItem 
                 key="home" 
+                disablePadding
                 variants={itemVariants}
-                whileHover={{ x: 10, backgroundColor: 'action.hover' }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ x: 10 }}
               >
-                <ListItemButton component={Link} href="/" onClick={toggleDrawer(false)}>
-                  <ListItemIcon sx={{ color: 'inherit' }}><StoreIcon /></ListItemIcon>
-                  <ListItemText primary="Home" />
+                <ListItemButton component={Link} href="/" onClick={toggleDrawer(false)} sx={{ py: 1.5 }}>
+                  <ListItemText 
+                    primary="HOME" 
+                    primaryTypographyProps={{ 
+                      fontSize: '1rem', 
+                      letterSpacing: '0.2em',
+                      fontWeight: 400
+                    }} 
+                  />
                 </ListItemButton>
               </MotionListItem>
 
               {/* CATEGORIES */}
               <MotionListItem 
                 key="categories" 
+                disablePadding
                 variants={itemVariants}
-                whileHover={{ x: 10, backgroundColor: 'action.hover' }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ x: 10 }}
               >
-                <ListItemButton component={Link} href="/categories" onClick={toggleDrawer(false)}>
-                  <ListItemIcon sx={{ color: 'inherit' }}><CategoryIcon /></ListItemIcon>
-                  <ListItemText primary="Categories" />
+                <ListItemButton component={Link} href="/categories" onClick={toggleDrawer(false)} sx={{ py: 1.5 }}>
+                  <ListItemText 
+                    primary="COLEÇÕES" 
+                    primaryTypographyProps={{ 
+                      fontSize: '1rem', 
+                      letterSpacing: '0.2em',
+                      fontWeight: 400
+                    }} 
+                  />
                 </ListItemButton>
               </MotionListItem>
 

@@ -99,59 +99,49 @@ export default function CarousselProducts() {
     };
 
    return (
-    <Box sx={{ py: 6 }}>
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true }}
-        variants={titleVariants}
-      >
-        <Typography
-            variant="h4"
-            fontWeight={900}
-            mb={4}
-            textTransform="uppercase"
-            sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: 2,
-                letterSpacing: '-0.02em',
-                fontSize: { xs: '1.75rem', md: '2.5rem' }
-            }}
+    <Box sx={{ py: 10, bgcolor: 'background.paper' }}>
+      <Container>
+        <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={titleVariants}
         >
-            <motion.span
-                animate={{ 
-                    scale: [1, 1.2, 1],
-                    rotate: [0, 10, -10, 0]
-                }}
-                transition={{ 
-                    repeat: Infinity, 
-                    duration: 2,
-                    ease: "easeInOut"
-                }}
-            >
-                🔥
-            </motion.span> 
-            Maiores Descontos
-        </Typography>
-      </motion.div>
+            <Box sx={{ mb: 6 }}>
+                <Typography
+                    variant="h4"
+                    sx={{ 
+                        fontFamily: 'var(--font-playfair)',
+                        fontWeight: 700,
+                        letterSpacing: '0.05em',
+                        mb: 1
+                    }}
+                >
+                    Ofertas de Prestígio
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                    Oportunidades exclusivas em nossa curadoria
+                </Typography>
+            </Box>
+        </motion.div>
+      </Container>
 
       <Swiper
         modules={[Navigation, Pagination, Autoplay]}
-        spaceBetween={24}
+        spaceBetween={30}
         slidesPerView={1.2}
         grabCursor={true}
         loop={true}
         autoplay={{
-            delay: 3000,
+            delay: 4000,
             disableOnInteraction: false,
             pauseOnMouseEnter: true
         }}
         breakpoints={{
           640: { slidesPerView: 2.2 },
-          1024: { slidesPerView: 5 },
+          1024: { slidesPerView: 4.5 },
         }}
-        style={{ padding: '20px 0' }}
+        style={{ padding: '0 5%' }}
       >
         {sortedProducts.map((product, index) => {
           const discount = calculateDiscountPercent(
@@ -170,16 +160,16 @@ export default function CarousselProducts() {
                   custom={index}
                   initial="hidden"
                   whileInView="visible"
-                  viewport={{ once: true, margin: "-100px" }}
+                  viewport={{ once: true, margin: "-50px" }}
                   variants={cardVariants}
                   whileHover="hover"
                   sx={{
                     borderRadius: 0,
-                    border: '2px solid #000',
+                    border: 'none',
                     position: 'relative',
                     cursor: 'pointer',
                     overflow: 'hidden',
-                    bgcolor: 'background.paper',
+                    bgcolor: 'transparent',
                     height: '100%',
                     display: 'flex',
                     flexDirection: 'column'
@@ -187,31 +177,30 @@ export default function CarousselProducts() {
                   elevation={0}
                 >
                   {discount > 0 && (
-                    <MotionChip
-                      label={`-${discount}%`}
-                      initial={{ x: -100 }}
-                      animate={{ x: 0 }}
-                      transition={{ delay: 0.5 + index * 0.1, type: 'spring', stiffness: 100 }}
+                    <Box
                       sx={{
                         position: 'absolute',
-                        top: 16,
-                        left: 16,
-                        backgroundColor: '#000',
-                        color: '#fff',
-                        fontWeight: 900,
+                        top: 0,
+                        left: 0,
+                        backgroundColor: 'primary.main',
+                        color: 'white',
+                        fontWeight: 600,
                         zIndex: 2,
-                        borderRadius: 0,
-                        px: 1,
-                        fontSize: '0.875rem',
+                        px: 1.5,
+                        py: 0.5,
+                        fontSize: '0.7rem',
+                        letterSpacing: '0.1em'
                       }}
-                    />
+                    >
+                      -{discount}%
+                    </Box>
                   )}
 
                   <Box sx={{ 
                     overflow: 'hidden', 
                     position: 'relative', 
-                    height: '320px',
-                    borderBottom: '2px solid #000'
+                    height: '400px',
+                    mb: 2
                   }}>
                     <MotionImage
                       src={product.imageUrl || product.images?.[0]?.url || '/next.svg'}
@@ -220,77 +209,34 @@ export default function CarousselProducts() {
                       height={400}
                       variants={{
                         hover: { 
-                            scale: 1.05,
-                            filter: 'grayscale(0%)'
+                            scale: 1.1
                         }
                       }}
-                      initial={{ filter: 'grayscale(20%)' }}
-                      transition={{ duration: 0.6, ease: [0.43, 0.13, 0.23, 0.96] }}
+                      transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1] }}
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
-                    
-                    <motion.div
-                        variants={{
-                            hover: { opacity: 1, y: 0 }
-                        }}
-                        initial={{ opacity: 0, y: 20 }}
-                        style={{
-                            position: 'absolute',
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            background: '#000',
-                            color: '#fff',
-                            padding: '12px',
-                            textAlign: 'center',
-                            fontWeight: 900,
-                            textTransform: 'uppercase',
-                            fontSize: '0.75rem',
-                            letterSpacing: '0.1em'
-                        }}
-                    >
-                        Ver Detalhes
-                    </motion.div>
                   </Box>
 
-                  <CardContent sx={{ p: 2.5, flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <CardContent sx={{ p: 0, textAlign: 'center' }}>
                     <Typography 
-                        variant="h6" 
-                        fontWeight={800}
-                        sx={{ 
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            lineHeight: 1.2,
-                            mb: 2,
-                            textTransform: 'uppercase'
-                        }}
+                      variant="body2" 
+                      sx={{ 
+                        fontWeight: 500, 
+                        letterSpacing: '0.05em', 
+                        textTransform: 'uppercase',
+                        mb: 1,
+                        color: 'text.primary'
+                      }}
                     >
                       {product.name}
                     </Typography>
-
-                    <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1.5 }}>
-                        <Typography 
-                            variant="h5" 
-                            fontWeight={900}
-                        >
-                            R$ {product.discountPrice ?? product.price}
-                        </Typography>
-                        
-                        {product.discountPrice && (
-                            <Typography
-                                variant="body2"
-                                sx={{ 
-                                    textDecoration: 'line-through', 
-                                    color: 'text.disabled',
-                                    fontWeight: 600
-                                }}
-                            >
-                                R$ {product.price}
-                            </Typography>
-                        )}
+                    <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, alignItems: 'center' }}>
+                      <Typography variant="body1" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.discountPrice ?? product.price)}
+                      </Typography>
+                      <Typography variant="caption" sx={{ textDecoration: 'line-through', color: 'text.disabled' }}>
+                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
+                      </Typography>
                     </Box>
                   </CardContent>
                 </MotionCard>
