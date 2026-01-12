@@ -1,0 +1,71 @@
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from '../src/app.module';
+import { ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ExpressAdapter } from '@nestjs/platform-express';
+import express, { json, urlencoded } from 'express';
+
+const server = express();
+
+export const bootstrap = async (expressInstance: express.Express) => {
+  const app = await NestFactory.create(
+    AppModule,
+    new ExpressAdapter(expressInstance),
+  );
+
+  app.use(json({ limit: '10mb' }));
+  app.use(urlencoded({ extended: true, limit: '10mb' }));
+
+  const frontendUrl = process.env.FRONTEND_URL || '*';
+  const allowedOriginsEnv = process.env.ALLOWED_ORIGINS || '';
+
+  app.enableCors({
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+      const allowedOrigins = [
+        frontendUrl,
+        'http://localhost:3000',
+        ...allowedOriginsEnv.split(',').filter(o => o.trim() !== '')
+      ];
+
+      if (
+        !origin || 
+        frontendUrl === '*' || 
+        allowedOrigins.includes(origin) || 
+        origin.endsWith('.vercel.app') ||
+        origin.includes('railway.app')
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  });
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+
+  app.setGlobalPrefix('api');
+
+  const config = new DocumentBuilder()
+    .setTitle('Ecommerce API')
+    .setDescription('The Ecommerce API description')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
+
+  await app.init();
+};
+
+bootstrap(server);
+
+export default server;

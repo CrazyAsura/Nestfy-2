@@ -1,0 +1,63 @@
+export const API_ROUTES = {
+    AUTH: {
+        LOGIN: 'auth/login',
+        REGISTER_PF: 'auth/register/pf',
+        REGISTER_PJ: 'auth/register/pj',
+        PROFILE: 'auth/profile',
+        RESET_PASSWORD: 'auth/reset-password',
+    },
+    PRODUCTS: {
+        BASE: 'products',
+        BY_ID: (id: string) => `products/${id}`,
+    },
+    CATEGORIES: {
+        BASE: 'categories',
+    },
+    ADMIN: {
+        BASE: 'admin/stats',
+        ORDERS: 'admin/orders',
+        RECENTE_ORDERS: 'admin/orders/recent',
+        USERS: 'admin/users',
+        USERS_PERMISSIONS: 'admin/users/permissions',
+        USERS_PERMISSIONS_UPDATE: (id: string) => `admin/users/permissions/${id}/update`,
+        USER_DETAILS: (id: string) => `admin/users/${id}`,
+        USER_UPDATE: (id: string) => `admin/users/${id}/update`,
+        USER_DELETE: (id: string) => `admin/users/${id}/delete`,
+        USER_HISTORIC: (id: string) => `admin/users/${id}/historic`,
+        PRODUCTS: 'admin/products',
+        PRODUCTS_POST: (id: string) => `admin/products/${id}/post`,
+        PRODUCTS_UPDATE: (id: string) => `admin/products/${id}/update`,
+        PRODUCTS_DELETE: (id: string) => `admin/products/${id}/delete`,
+        PRODUCTS_UPLOAD_IMAGE: (id: string) => `admin/products/${id}/upload-image`,
+        CATEGORIES: 'admin/categories',
+        CATEGORIES_POST: (id: string) => `admin/categories/${id}/post`,
+        CATEGORIES_UPDATE: (id: string) => `admin/categories/${id}/update`,
+        CATEGORIES_DELETE: (id: string) => `admin/categories/${id}/delete`,
+        PAYMENT_HISTORIC: (id: string) => `admin/payment/${id}/historic`,
+        ACTIVITY_LOGS: 'admin/activity-logs',
+    },
+    ORDERS: {
+        BASE: 'orders',
+        BY_ID: (id: string) => `orders/${id}`,
+    },
+    NOTIFICATIONS: {
+        BASE: 'notifications',
+        READ: (id: string) => `notifications/${id}/read`,
+        READ_ALL: 'notifications/read-all',
+    },
+    REVIEWS: {
+        BASE: 'review',
+        BY_PRODUCT: (productId: string) => `review/product/${productId}`,
+    },
+    PAYMENT: {
+        CHECKOUT: 'payment/create-checkout-session',
+        WEBHOOK: 'payment/webhook',
+        CONFIRM: 'payment/confirm-payment',
+    },
+    WISHLIST: {
+        BASE: 'wishlist',
+        BY_USER: (userId: string) => `wishlist/user/${userId}`,
+        ADD_ITEM: 'wishlist-item',
+        REMOVE_ITEM: (id: string) => `wishlist-item/${id}`,
+    }
+} as const;
