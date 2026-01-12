@@ -75,34 +75,72 @@ export default function ResetPasswordForm() {
             minHeight: '100vh',
             display: 'flex',
             alignItems: 'center',
-            background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-            py: 4
+            justifyContent: 'center',
+            background: (theme) => theme.palette.mode === 'light' 
+                ? 'radial-gradient(circle at 50% 50%, #ffffff 0%, #f0f0f0 100%)'
+                : 'radial-gradient(circle at 50% 50%, #1a1a1a 0%, #050505 100%)',
+            position: 'relative',
+            overflow: 'hidden',
+            '&::before': {
+                content: '""',
+                position: 'absolute',
+                width: '150%',
+                height: '150%',
+                background: (theme) => theme.palette.mode === 'light'
+                    ? 'url("https://www.transparenttextures.com/patterns/cubes.png")'
+                    : 'url("https://www.transparenttextures.com/patterns/dark-matter.png")',
+                opacity: 0.03,
+                animation: 'pulse 20s infinite alternate',
+            },
+            '@keyframes pulse': {
+                '0%': { transform: 'scale(1) rotate(0deg)' },
+                '100%': { transform: 'scale(1.1) rotate(3deg)' }
+            }
         }}>
-            <Container maxWidth="xs">
+            <Container maxWidth="xs" sx={{ position: 'relative', zIndex: 1 }}>
                 <MotionPaper 
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5 }}
-                    elevation={10}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    elevation={0}
                     sx={{
-                        p: { xs: 3, md: 6 },
-                        borderRadius: 4,
-                        bgcolor: 'rgba(255, 255, 255, 0.9)',
-                        backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        p: { xs: 4, md: 8 },
+                        borderRadius: 0,
+                        bgcolor: (theme) => theme.palette.mode === 'light' 
+                            ? 'rgba(255, 255, 255, 0.8)' 
+                            : 'rgba(13, 13, 13, 0.8)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid',
+                        borderColor: 'primary.main',
+                        boxShadow: (theme) => theme.palette.mode === 'light'
+                            ? '0 20px 40px rgba(0,0,0,0.1)'
+                            : '0 20px 40px rgba(0,0,0,0.4)',
+                        textAlign: 'center'
                     }}
                 >
                     <Typography 
-                        variant='h4'
+                        variant='h3'
                         align='center'
-                        sx={{ fontWeight: 900, mb: 1, color: '#1a1a1a' }}
+                        sx={{ 
+                            fontFamily: 'var(--font-playfair)',
+                            fontWeight: 700, 
+                            mb: 1, 
+                            color: 'text.primary',
+                            letterSpacing: '-0.02em'
+                        }}
                     >
-                        Nova Senha
+                        NOVA SENHA
                     </Typography>
                     <Typography 
                         variant='body2'
                         align='center'
-                        sx={{ color: '#666', mb: 4 }}
+                        sx={{ 
+                            color: 'text.secondary', 
+                            mb: 6,
+                            letterSpacing: '0.2em',
+                            textTransform: 'uppercase',
+                            fontSize: '0.75rem'
+                        }}
                     >
                         Redefina sua senha de acesso
                     </Typography>
@@ -112,18 +150,21 @@ export default function ResetPasswordForm() {
                         onSubmit={handleSubmit(onSubmit)}
                     >
                         <TextField
-                            label="E-mail" 
+                            label="E-MAIL" 
                             fullWidth
+                            variant="standard"
                             autoComplete="email"
                             {...register('email')}
                             error={!!errors.email}
                             helperText={errors.email?.message}
-                            InputLabelProps={{ shrink: true }}
-                            sx={{ mb: 3 }}
+                            sx={{ 
+                                mb: 4,
+                                '& .MuiInputLabel-root': { letterSpacing: '0.1em', fontSize: '0.75rem' }
+                            }}
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <Email color="action" />
+                                        <Email sx={{ color: 'primary.main', fontSize: 20 }} />
                                     </InputAdornment>
                                 ),
                             }}
@@ -131,24 +172,27 @@ export default function ResetPasswordForm() {
 
                         <TextField 
                             type={showPassword ? 'text' : 'password'}
-                            label="Nova Senha"
+                            label="NOVA SENHA"
                             fullWidth
+                            variant="standard"
                             autoComplete="new-password"
                             {...register('password')}
                             error={!!errors.password}
                             helperText={errors.password?.message}
-                            InputLabelProps={{ shrink: true }}
-                            sx={{ mb: 3 }}
+                            sx={{ 
+                                mb: 4,
+                                '& .MuiInputLabel-root': { letterSpacing: '0.1em', fontSize: '0.75rem' }
+                            }}
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <Lock color="action" />
+                                        <Lock sx={{ color: 'primary.main', fontSize: 20 }} />
                                     </InputAdornment>
                                 ),
                                 endAdornment: (
                                     <InputAdornment position="end">
-                                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" size="small">
+                                            {showPassword ? <VisibilityOff sx={{ fontSize: 20 }} /> : <Visibility sx={{ fontSize: 20 }} />}
                                         </IconButton>
                                     </InputAdornment>
                                 )
@@ -157,18 +201,21 @@ export default function ResetPasswordForm() {
 
                         <TextField 
                             type={showPassword ? 'text' : 'password'}
-                            label="Confirmar Nova Senha"
+                            label="CONFIRMAR NOVA SENHA"
                             fullWidth
+                            variant="standard"
                             autoComplete="new-password"
                             {...register('confirmPassword')}
                             error={!!errors.confirmPassword}
                             helperText={errors.confirmPassword?.message}
-                            InputLabelProps={{ shrink: true }}
-                            sx={{ mb: 4 }}
+                            sx={{ 
+                                mb: 6,
+                                '& .MuiInputLabel-root': { letterSpacing: '0.1em', fontSize: '0.75rem' }
+                            }}
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <LockReset color="action" />
+                                        <LockReset sx={{ color: 'primary.main', fontSize: 20 }} />
                                     </InputAdornment>
                                 )
                             }}
@@ -179,7 +226,7 @@ export default function ResetPasswordForm() {
                                 color="error" 
                                 variant="body2" 
                                 align="center" 
-                                sx={{ mb: 2, fontWeight: 600 }}
+                                sx={{ mb: 4, fontWeight: 600, letterSpacing: '0.02em' }}
                             >
                                 {submitError}
                             </Typography>
@@ -192,12 +239,16 @@ export default function ResetPasswordForm() {
                             disabled={isPending}
                             endIcon={isPending ? <CircularProgress size={20} color="inherit" /> : <LockReset />}
                             sx={{ 
-                                bgcolor: '#000',
-                                '&:hover': { bgcolor: '#333' },
+                                bgcolor: 'primary.main',
+                                color: 'primary.contrastText',
+                                '&:hover': { bgcolor: 'primary.dark' },
                                 fontWeight: 700,
-                                py: 1.5,
-                                borderRadius: 2,
-                                mb: 3
+                                py: 2,
+                                borderRadius: 0,
+                                mb: 4,
+                                letterSpacing: '0.2em',
+                                textTransform: 'uppercase',
+                                boxShadow: '0 10px 20px rgba(175, 148, 79, 0.2)'
                             }}
                         >
                             {isPending ? "Processando..." : "Redefinir Senha"}
@@ -208,7 +259,14 @@ export default function ResetPasswordForm() {
                             href="/login"
                             fullWidth
                             startIcon={<ArrowBack />}
-                            sx={{ color: '#666', fontWeight: 600 }}
+                            sx={{ 
+                                color: 'text.secondary', 
+                                fontWeight: 600,
+                                letterSpacing: '0.1em',
+                                textTransform: 'uppercase',
+                                fontSize: '0.75rem',
+                                '&:hover': { color: 'primary.main', bgcolor: 'transparent' }
+                            }}
                         >
                             Voltar para o Login
                         </Button>

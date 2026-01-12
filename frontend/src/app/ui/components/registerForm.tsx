@@ -200,39 +200,91 @@ export default function RegisterForm () {
             minHeight: '100vh',
             display: 'flex',
             alignItems: 'center',
-            background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-            py: 4
+            justifyContent: 'center',
+            background: (theme) => theme.palette.mode === 'light' 
+                ? 'radial-gradient(circle at 50% 50%, #ffffff 0%, #f0f0f0 100%)'
+                : 'radial-gradient(circle at 50% 50%, #1a1a1a 0%, #050505 100%)',
+            position: 'relative',
+            overflow: 'hidden',
+            py: 8,
+            '&::before': {
+                content: '""',
+                position: 'absolute',
+                width: '150%',
+                height: '150%',
+                background: (theme) => theme.palette.mode === 'light'
+                    ? 'url("https://www.transparenttextures.com/patterns/cubes.png")'
+                    : 'url("https://www.transparenttextures.com/patterns/dark-matter.png")',
+                opacity: 0.03,
+                animation: 'pulse 20s infinite alternate',
+            },
+            '@keyframes pulse': {
+                '0%': { transform: 'scale(1) rotate(0deg)' },
+                '100%': { transform: 'scale(1.1) rotate(3deg)' }
+            }
         }}>
-            <Container maxWidth='md'>
+            <Container maxWidth='md' sx={{ position: 'relative', zIndex: 1 }}>
                 <MotionPaper 
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5 }}
-                    elevation={10}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    elevation={0}
                     sx={{
-                        p: { xs: 3, md: 6 },
-                        borderRadius: 4,
-                        bgcolor: 'rgba(255, 255, 255, 0.9)',
-                        backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        p: { xs: 4, md: 8 },
+                        borderRadius: 0,
+                        bgcolor: (theme) => theme.palette.mode === 'light' 
+                            ? 'rgba(255, 255, 255, 0.8)' 
+                            : 'rgba(13, 13, 13, 0.8)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid',
+                        borderColor: 'primary.main',
+                        boxShadow: (theme) => theme.palette.mode === 'light'
+                            ? '0 20px 40px rgba(0,0,0,0.1)'
+                            : '0 20px 40px rgba(0,0,0,0.4)',
                     }}
                 >
                     <Typography 
-                        variant='h4'
+                        variant='h3'
                         align='center'
-                        sx={{ fontWeight: 900, mb: 1, color: '#1a1a1a' }}
+                        sx={{ 
+                            fontFamily: 'var(--font-playfair)',
+                            fontWeight: 700, 
+                            mb: 1, 
+                            color: 'text.primary',
+                            letterSpacing: '-0.02em'
+                        }}
                     >
-                        Criar Conta
+                        CRIAR CONTA
                     </Typography>
                     <Typography 
-                        variant='body1'
+                        variant='body2'
                         align='center'
-                        sx={{ color: '#666', mb: 4 }}
+                        sx={{ 
+                            color: 'text.secondary', 
+                            mb: 6,
+                            letterSpacing: '0.2em',
+                            textTransform: 'uppercase',
+                            fontSize: '0.75rem'
+                        }}
                     >
                         Junte-se à nossa comunidade exclusiva
                     </Typography>
 
-                    <Stepper activeStep={activeStep} sx={{ mb: 6, display: { xs: 'none', sm: 'flex' } }}>
+                    <Stepper 
+                        activeStep={activeStep} 
+                        sx={{ 
+                            mb: 8, 
+                            display: { xs: 'none', sm: 'flex' },
+                            '& .MuiStepIcon-root.Mui-active': { color: 'primary.main' },
+                            '& .MuiStepIcon-root.Mui-completed': { color: 'primary.main' },
+                            '& .MuiStepLabel-label': { 
+                                fontFamily: 'var(--font-playfair)',
+                                fontSize: '0.7rem',
+                                letterSpacing: '0.1em',
+                                textTransform: 'uppercase'
+                            }
+                        }}
+                    >
                         {steps.map((label) => (
                             <Step key={label}>
                                 <StepLabel>{label}</StepLabel>
@@ -249,37 +301,55 @@ export default function RegisterForm () {
                                     initial="hidden"
                                     animate="visible"
                                     exit="exit"
-                                    transition={{ duration: 0.3 }}
+                                    transition={{ duration: 0.5 }}
                                 >
-                                    <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <Person color="primary" />
-                                        <Typography variant="h6" fontWeight={700}>Identificação</Typography>
+                                    <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'center' }}>
+                                        <Person sx={{ color: 'primary.main', fontSize: 24 }} />
+                                        <Typography variant="h6" sx={{ 
+                                            fontFamily: 'var(--font-playfair)',
+                                            letterSpacing: '0.05em',
+                                            textTransform: 'uppercase'
+                                        }}>
+                                            Identificação
+                                        </Typography>
                                     </Box>
                                     
                                     <TextField 
-                                        label="Nome Completo"
+                                        label="NOME COMPLETO"
                                         fullWidth
+                                        variant="standard"
                                         autoComplete="name"
                                         error={!!errors.name}
                                         helperText={errors.name?.message}
                                         {...register('name')}
-                                        sx={{ mb: 2 }}
+                                        sx={{ 
+                                            mb: 4,
+                                            '& .MuiInputLabel-root': { letterSpacing: '0.1em', fontSize: '0.75rem' }
+                                        }}
                                     />
                                     <TextField 
-                                        label="E-mail Profissional"
+                                        label="E-MAIL PROFISSIONAL"
                                         fullWidth
+                                        variant="standard"
                                         autoComplete="email"
                                         error={!!errors.email}
                                         helperText={errors.email?.message}
                                         {...register('email')}
-                                        sx={{ mb: 2 }}
+                                        sx={{ 
+                                            mb: 4,
+                                            '& .MuiInputLabel-root': { letterSpacing: '0.1em', fontSize: '0.75rem' }
+                                        }}
                                     />
                                     
-                                    <Box sx={{ display: 'flex', gap: 2, mb: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
+                                    <Box sx={{ display: 'flex', gap: 4, mb: 4, flexDirection: { xs: 'column', sm: 'row' } }}>
                                         <TextField 
                                             select
-                                            label="Tipo de Conta"
-                                            sx={{ flex: 1 }}
+                                            label="TIPO DE CONTA"
+                                            variant="standard"
+                                            sx={{ 
+                                                flex: 1,
+                                                '& .MuiInputLabel-root': { letterSpacing: '0.1em', fontSize: '0.75rem' }
+                                            }}
                                             {...register('userType')}
                                         >
                                             <MenuItem value='INDIVIDUAL'>Pessoa Física</MenuItem>
@@ -292,8 +362,12 @@ export default function RegisterForm () {
                                             render={({ field }) => (
                                                 <TextField 
                                                     {...field}
+                                                    variant="standard"
                                                     label={userType === 'LEGAL_ENTITY' ? "CNPJ" : "CPF"}
-                                                    sx={{ flex: 2 }}
+                                                    sx={{ 
+                                                        flex: 2,
+                                                        '& .MuiInputLabel-root': { letterSpacing: '0.1em', fontSize: '0.75rem' }
+                                                    }}
                                                     error={!!errors.document}
                                                     helperText={errors.document?.message} 
                                                     onChange={(e) => {
@@ -316,27 +390,37 @@ export default function RegisterForm () {
                                     initial="hidden"
                                     animate="visible"
                                     exit="exit"
-                                    transition={{ duration: 0.3 }}
+                                    transition={{ duration: 0.5 }}
                                 >
-                                    <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <Lock color="primary" />
-                                        <Typography variant="h6" fontWeight={700}>Segurança</Typography>
+                                    <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'center' }}>
+                                        <Lock sx={{ color: 'primary.main', fontSize: 24 }} />
+                                        <Typography variant="h6" sx={{ 
+                                            fontFamily: 'var(--font-playfair)',
+                                            letterSpacing: '0.05em',
+                                            textTransform: 'uppercase'
+                                        }}>
+                                            Segurança
+                                        </Typography>
                                     </Box>
 
                                     <TextField 
                                         type={showPassword ? 'text' : 'password'}
-                                        label="Crie sua Senha"
+                                        label="CRIE SUA SENHA"
                                         fullWidth
+                                        variant="standard"
                                         autoComplete="new-password"
                                         error={!!errors.password}
                                         helperText={errors.password?.message}
                                         {...register('password')}
-                                        sx={{ mb: 2 }}
+                                        sx={{ 
+                                            mb: 4,
+                                            '& .MuiInputLabel-root': { letterSpacing: '0.1em', fontSize: '0.75rem' }
+                                        }}
                                         InputProps={{
                                             endAdornment: (
                                                 <InputAdornment position="end">
-                                                    <IconButton onClick={() => setShowPassword(!showPassword)}>
-                                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                    <IconButton onClick={() => setShowPassword(!showPassword)} size="small">
+                                                        {showPassword ? <VisibilityOff sx={{ fontSize: 20 }} /> : <Visibility sx={{ fontSize: 20 }} />}
                                                     </IconButton>
                                                 </InputAdornment>
                                             )
@@ -344,12 +428,17 @@ export default function RegisterForm () {
                                     />
                                     <TextField 
                                         type={showPassword ? 'text' : 'password'}
-                                        label="Confirme sua Senha"
+                                        label="CONFIRME SUA SENHA"
                                         fullWidth
+                                        variant="standard"
                                         autoComplete="new-password"
                                         error={!!errors.confirmPassword}
                                         helperText={errors.confirmPassword?.message}
                                         {...register('confirmPassword')}
+                                        sx={{ 
+                                            mb: 2,
+                                            '& .MuiInputLabel-root': { letterSpacing: '0.1em', fontSize: '0.75rem' }
+                                        }}
                                     />
                                 </motion.div>
                             )}
@@ -361,22 +450,32 @@ export default function RegisterForm () {
                                     initial="hidden"
                                     animate="visible"
                                     exit="exit"
-                                    transition={{ duration: 0.3 }}
+                                    transition={{ duration: 0.5 }}
                                 >
-                                    <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <LocationOn color="primary" />
-                                        <Typography variant="h6" fontWeight={700}>Endereço & Contato</Typography>
+                                    <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'center' }}>
+                                        <LocationOn sx={{ color: 'primary.main', fontSize: 24 }} />
+                                        <Typography variant="h6" sx={{ 
+                                            fontFamily: 'var(--font-playfair)',
+                                            letterSpacing: '0.05em',
+                                            textTransform: 'uppercase'
+                                        }}>
+                                            Endereço & Contato
+                                        </Typography>
                                     </Box>
 
-                                    <Box sx={{ display: 'flex', gap: 2, mb: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
+                                    <Box sx={{ display: 'flex', gap: 4, mb: 4, flexDirection: { xs: 'column', sm: 'row' } }}>
                                         <Controller
                                             name="zipCode"
                                             control={control}
                                             render={({ field }) => (
                                                 <TextField 
                                                     {...field}
+                                                    variant="standard"
                                                     label="CEP"
-                                                    sx={{ flex: 1 }}
+                                                    sx={{ 
+                                                        flex: 1,
+                                                        '& .MuiInputLabel-root': { letterSpacing: '0.1em', fontSize: '0.75rem' }
+                                                    }}
                                                     autoComplete="postal-code"
                                                     error={!!errors.zipCode}
                                                     helperText={errors.zipCode?.message} 
@@ -390,8 +489,12 @@ export default function RegisterForm () {
                                             )}
                                         />
                                         <TextField 
-                                            label="Número"
-                                            sx={{ flex: 1 }}
+                                            label="NÚMERO"
+                                            variant="standard"
+                                            sx={{ 
+                                                flex: 1,
+                                                '& .MuiInputLabel-root': { letterSpacing: '0.1em', fontSize: '0.75rem' }
+                                            }}
                                             autoComplete="address-line2"
                                             error={!!errors.number}
                                             helperText={errors.number?.message} 
@@ -401,20 +504,28 @@ export default function RegisterForm () {
                                     </Box>
 
                                     <TextField 
-                                        label="Rua / Logradouro"
+                                        label="RUA / LOGRADOURO"
                                         fullWidth
+                                        variant="standard"
                                         autoComplete="address-line1"
                                         error={!!errors.street}
                                         helperText={errors.street?.message}
                                         InputLabelProps={{ shrink: true }}
                                         {...register('street')}
-                                        sx={{ mb: 2 }}
+                                        sx={{ 
+                                            mb: 4,
+                                            '& .MuiInputLabel-root': { letterSpacing: '0.1em', fontSize: '0.75rem' }
+                                        }}
                                     />
                                     
-                                    <Box sx={{ display: 'flex', gap: 2, mb: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
+                                    <Box sx={{ display: 'flex', gap: 4, mb: 4, flexDirection: { xs: 'column', sm: 'row' } }}>
                                         <TextField 
-                                            label="Bairro"
-                                            sx={{ flex: 1 }}
+                                            label="BAIRRO"
+                                            variant="standard"
+                                            sx={{ 
+                                                flex: 1,
+                                                '& .MuiInputLabel-root': { letterSpacing: '0.1em', fontSize: '0.75rem' }
+                                            }}
                                             error={!!errors.neighborhood}
                                             helperText={errors.neighborhood?.message} 
                                             InputLabelProps={{ shrink: true }}
@@ -435,10 +546,12 @@ export default function RegisterForm () {
                                                     renderInput={(params) => (
                                                         <TextField
                                                             {...params}
-                                                            label="Cidade"
+                                                            variant="standard"
+                                                            label="CIDADE"
                                                             error={!!errors.city}
                                                             helperText={errors.city?.message}
                                                             InputLabelProps={{ ...params.InputLabelProps, shrink: true }}
+                                                            sx={{ '& .MuiInputLabel-root': { letterSpacing: '0.1em', fontSize: '0.75rem' } }}
                                                         />
                                                     )}
                                                 />
@@ -446,7 +559,7 @@ export default function RegisterForm () {
                                         />
                                     </Box>
 
-                                    <Box sx={{ display: 'flex', gap: 2, mb: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
+                                    <Box sx={{ display: 'flex', gap: 4, mb: 4, flexDirection: { xs: 'column', sm: 'row' } }}>
                                         <Controller
                                             name="state"
                                             control={control}
@@ -465,18 +578,24 @@ export default function RegisterForm () {
                                                     renderInput={(params) => (
                                                         <TextField
                                                             {...params}
-                                                            label="Estado"
+                                                            variant="standard"
+                                                            label="ESTADO"
                                                             error={!!errors.state}
                                                             helperText={errors.state?.message}
                                                             InputLabelProps={{ ...params.InputLabelProps, shrink: true }}
+                                                            sx={{ '& .MuiInputLabel-root': { letterSpacing: '0.1em', fontSize: '0.75rem' } }}
                                                         />
                                                     )}
                                                 />
                                             )}
                                         />
                                         <TextField 
-                                            label="País"
-                                            sx={{ flex: 1 }}
+                                            label="PAÍS"
+                                            variant="standard"
+                                            sx={{ 
+                                                flex: 1,
+                                                '& .MuiInputLabel-root': { letterSpacing: '0.1em', fontSize: '0.75rem' }
+                                            }}
                                             error={!!errors.country}
                                             helperText={errors.country?.message} 
                                             InputLabelProps={{ shrink: true }}
@@ -484,14 +603,20 @@ export default function RegisterForm () {
                                         />
                                     </Box>
 
-                                    <Divider sx={{ my: 3 }} />
+                                    <Divider sx={{ my: 6, borderColor: 'divider' }} />
 
-                                    <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <PhoneIcon color="primary" />
-                                        <Typography variant="h6" fontWeight={700}>Contato</Typography>
+                                    <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'center' }}>
+                                        <PhoneIcon sx={{ color: 'primary.main', fontSize: 24 }} />
+                                        <Typography variant="h6" sx={{ 
+                                            fontFamily: 'var(--font-playfair)',
+                                            letterSpacing: '0.05em',
+                                            textTransform: 'uppercase'
+                                        }}>
+                                            Contato
+                                        </Typography>
                                     </Box>
 
-                                    <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
+                                    <Box sx={{ display: 'flex', gap: 4, flexDirection: { xs: 'column', sm: 'row' } }}>
                                         <Controller
                                             name="ddi"
                                             control={control}
@@ -517,7 +642,15 @@ export default function RegisterForm () {
                                                     }}
                                                     onInputChange={(_, newInputValue) => field.onChange(newInputValue.replace('+', ''))}
                                                     renderInput={(params) => (
-                                                        <TextField {...params} label="DDI" error={!!errors.ddi} helperText={errors.ddi?.message} InputLabelProps={{ ...params.InputLabelProps, shrink: true }} />
+                                                        <TextField 
+                                                            {...params} 
+                                                            variant="standard"
+                                                            label="DDI" 
+                                                            error={!!errors.ddi} 
+                                                            helperText={errors.ddi?.message} 
+                                                            InputLabelProps={{ ...params.InputLabelProps, shrink: true }} 
+                                                            sx={{ '& .MuiInputLabel-root': { letterSpacing: '0.1em', fontSize: '0.75rem' } }}
+                                                        />
                                                     )}
                                                 />
                                             )}
@@ -545,8 +678,12 @@ export default function RegisterForm () {
                                             render={({ field }) => (
                                                 <TextField 
                                                     {...field}
-                                                    label="Celular"
-                                                    sx={{ flex: 3 }}
+                                                    variant="standard"
+                                                    label="CELULAR"
+                                                    sx={{ 
+                                                        flex: 3,
+                                                        '& .MuiInputLabel-root': { letterSpacing: '0.1em', fontSize: '0.75rem' }
+                                                    }}
                                                     autoComplete="tel-national"
                                                     error={!!errors.numberPhone}
                                                     helperText={errors.numberPhone?.message} 
@@ -566,51 +703,59 @@ export default function RegisterForm () {
                                     initial="hidden"
                                     animate="visible"
                                     exit="exit"
-                                    transition={{ duration: 0.3 }}
+                                    transition={{ duration: 0.5 }}
                                 >
-                                    <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <Policy color="primary" />
-                                        <Typography variant="h6" fontWeight={700}>Privacidade & Termos</Typography>
+                                    <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'center' }}>
+                                        <Policy sx={{ color: 'primary.main', fontSize: 24 }} />
+                                        <Typography variant="h6" sx={{ 
+                                            fontFamily: 'var(--font-playfair)',
+                                            letterSpacing: '0.05em',
+                                            textTransform: 'uppercase'
+                                        }}>
+                                            Privacidade & Termos
+                                        </Typography>
                                     </Box>
 
                                     <Paper 
-                                        variant="outlined" 
+                                        elevation={0}
                                         sx={{ 
-                                            p: 2, 
+                                            p: 3, 
                                             maxHeight: 250, 
                                             overflowY: 'auto', 
-                                            bgcolor: '#f8f9fa',
-                                            mb: 2,
-                                            fontSize: '0.875rem',
-                                            color: '#444',
-                                            '&::-webkit-scrollbar': { width: '8px' },
-                                            '&::-webkit-scrollbar-thumb': { bgcolor: '#ccc', borderRadius: '4px' }
+                                            bgcolor: (theme) => theme.palette.mode === 'light' ? 'rgba(0,0,0,0.02)' : 'rgba(255,255,255,0.02)',
+                                            border: '1px solid',
+                                            borderColor: 'divider',
+                                            mb: 4,
+                                            fontSize: '0.8rem',
+                                            color: 'text.secondary',
+                                            '&::-webkit-scrollbar': { width: '4px' },
+                                            '&::-webkit-scrollbar-thumb': { bgcolor: 'primary.main', borderRadius: '0px' }
                                         }}
                                     >
-                                        <Typography variant="subtitle2" fontWeight={800} gutterBottom>
+                                        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, color: 'text.primary', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                                             Política de Privacidade (LGPD)
                                         </Typography>
-                                        <Typography variant="body2" paragraph>
+                                        <Typography variant="body2" paragraph sx={{ fontSize: '0.8rem', lineHeight: 1.8 }}>
                                             Ao utilizar nossos serviços, você concorda com a coleta e uso de suas informações pessoais conforme descrito nesta política. 
                                             Nós respeitamos sua privacidade e estamos comprometidos em proteger seus dados pessoais.
                                         </Typography>
-                                        <Typography variant="body2" paragraph>
+                                        <Typography variant="body2" paragraph sx={{ fontSize: '0.8rem', lineHeight: 1.8 }}>
                                             <strong>1. Coleta de Dados:</strong> Coletamos dados como nome, e-mail, documento (CPF/CNPJ), endereço e telefone para fins de cadastro, 
                                             processamento de pedidos e comunicação.
                                         </Typography>
-                                        <Typography variant="body2" paragraph>
+                                        <Typography variant="body2" paragraph sx={{ fontSize: '0.8rem', lineHeight: 1.8 }}>
                                             <strong>2. Uso de Dados:</strong> Seus dados são utilizados para garantir a segurança da sua conta, processar transações e 
                                             personalizar sua experiência em nossa plataforma.
                                         </Typography>
-                                        <Typography variant="body2" paragraph>
+                                        <Typography variant="body2" paragraph sx={{ fontSize: '0.8rem', lineHeight: 1.8 }}>
                                             <strong>3. Segurança:</strong> Implementamos medidas técnicas e organizacionais para proteger seus dados contra acesso não autorizado, 
                                             perda ou alteração.
                                         </Typography>
-                                        <Typography variant="body2" paragraph>
+                                        <Typography variant="body2" paragraph sx={{ fontSize: '0.8rem', lineHeight: 1.8 }}>
                                             <strong>4. Seus Direitos:</strong> Sob a LGPD, você tem o direito de acessar, corrigir ou excluir seus dados a qualquer momento através 
                                             de nossas configurações de conta ou suporte.
                                         </Typography>
-                                        <Typography variant="body2">
+                                        <Typography variant="body2" sx={{ fontSize: '0.8rem', lineHeight: 1.8 }}>
                                             Para mais detalhes, consulte nossa página completa de Política de Privacidade no rodapé do site.
                                         </Typography>
                                     </Paper>
@@ -626,10 +771,11 @@ export default function RegisterForm () {
                                                         checked={field.value}
                                                         color="primary"
                                                         onChange={(e) => field.onChange(e.target.checked)}
+                                                        sx={{ color: 'primary.main', '&.Mui-checked': { color: 'primary.main' } }}
                                                     />
                                                 }
                                                 label={
-                                                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                                    <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.primary', fontSize: '0.8rem', letterSpacing: '0.02em' }}>
                                                         Li e concordo com os termos da Política de Privacidade e LGPD.
                                                     </Typography>
                                                 }
@@ -637,7 +783,7 @@ export default function RegisterForm () {
                                         )}
                                     />
                                     {errors.privacyPolicy && (
-                                        <Typography color="error" variant="caption" sx={{ display: 'block', mt: 1 }}>
+                                        <Typography color="error" variant="caption" sx={{ display: 'block', mt: 1, letterSpacing: '0.02em' }}>
                                             {errors.privacyPolicy.message}
                                         </Typography>
                                     )}
@@ -650,19 +796,26 @@ export default function RegisterForm () {
                                 color="error" 
                                 variant="body2" 
                                 align="center" 
-                                sx={{ mt: 2, mb: 1, fontWeight: 600 }}
+                                sx={{ mt: 4, mb: 1, fontWeight: 600, letterSpacing: '0.02em' }}
                             >
                                 {submitError}
                             </Typography>
                         )}
 
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4, gap: 2 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 8, gap: 2 }}>
                             {activeStep !== 0 && (
                                 <Button
                                     type="button"
                                     onClick={handleBack}
                                     startIcon={<ArrowBack />}
-                                    sx={{ color: '#666', fontWeight: 700 }}
+                                    sx={{ 
+                                        color: 'text.secondary', 
+                                        fontWeight: 600,
+                                        letterSpacing: '0.1em',
+                                        textTransform: 'uppercase',
+                                        fontSize: '0.75rem',
+                                        '&:hover': { color: 'primary.main', bgcolor: 'transparent' }
+                                    }}
                                 >
                                     Voltar
                                 </Button>
@@ -677,12 +830,16 @@ export default function RegisterForm () {
                                     fullWidth={activeStep === 0}
                                     sx={{ 
                                         ml: 'auto',
-                                        bgcolor: '#000',
-                                        '&:hover': { bgcolor: '#333' },
+                                        bgcolor: 'primary.main',
+                                        color: 'primary.contrastText',
+                                        '&:hover': { bgcolor: 'primary.dark' },
                                         fontWeight: 700,
-                                        px: 4,
-                                        py: 1.5,
-                                        borderRadius: 2
+                                        px: 6,
+                                        py: 2,
+                                        borderRadius: 0,
+                                        letterSpacing: '0.2em',
+                                        textTransform: 'uppercase',
+                                        boxShadow: '0 10px 20px rgba(175, 148, 79, 0.2)'
                                     }}
                                 >
                                     Continuar
@@ -695,12 +852,16 @@ export default function RegisterForm () {
                                     endIcon={isPending ? <CircularProgress size={20} color="inherit" /> : <CheckCircle />}
                                     sx={{ 
                                         ml: 'auto',
-                                        bgcolor: '#000',
-                                        '&:hover': { bgcolor: '#333' },
+                                        bgcolor: 'primary.main',
+                                        color: 'primary.contrastText',
+                                        '&:hover': { bgcolor: 'primary.dark' },
                                         fontWeight: 700,
-                                        px: 6,
-                                        py: 1.5,
-                                        borderRadius: 2
+                                        px: 8,
+                                        py: 2,
+                                        borderRadius: 0,
+                                        letterSpacing: '0.2em',
+                                        textTransform: 'uppercase',
+                                        boxShadow: '0 10px 20px rgba(175, 148, 79, 0.2)'
                                     }}
                                 >
                                     {isPending ? "Finalizando..." : "Concluir Cadastro"}
@@ -708,17 +869,18 @@ export default function RegisterForm () {
                             )}
                         </Box>
 
-                        <Box sx={{ mt: 4, textAlign: 'center' }}>
-                            <Typography variant="body2" sx={{ color: '#666' }}>
-                                Já faz parte da nossa loja? 
+                        <Box sx={{ mt: 6, textAlign: 'center' }}>
+                            <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.75rem', letterSpacing: '0.05em' }}>
+                                JÁ FAZ PARTE DA NOSSA LOJA? 
                                 <Link 
                                     href="/login"
                                     style={{ 
-                                        color: '#000', 
-                                        fontWeight: 800, 
-                                        marginLeft: '8px',
+                                        color: '#AF944F', 
+                                        fontWeight: 700, 
+                                        marginLeft: '12px',
                                         textDecoration: 'none',
-                                        borderBottom: '2px solid #000'
+                                        borderBottom: '1px solid #AF944F',
+                                        paddingBottom: '2px'
                                     }}
                                 >
                                     ENTRAR AGORA
