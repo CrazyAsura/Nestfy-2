@@ -59,6 +59,11 @@ export class FinanceService {
       // Detalhes do Pagamento
       doc.text(`Vencimento: ${new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR')}`);
       doc.text(`Valor: R$ ${order.totalAmount.toFixed(2)}`);
+      
+      if (order.totalTaxAmount > 0) {
+        doc.moveDown(0.5);
+        doc.fontSize(8).text(`(Incluso R$ ${order.totalTaxAmount.toFixed(2)} de tributos totais incidentes sobre a operação)`, { align: 'left' });
+      }
       doc.moveDown();
 
       // Gerar Código de Barras
@@ -123,14 +128,26 @@ export class FinanceService {
 
       // Tabela de Itens
       doc.font('Helvetica-Bold').text('ITENS DO PEDIDO:').font('Helvetica');
-      doc.moveDown();
+      doc.moveDown(0.5);
 
       items.forEach((item: any) => {
-        doc.text(`${item.productId?.name || 'Produto'} - Qtd: ${item.quantity} - Preço: R$ ${item.price.toFixed(2)}`);
+        const productName = item.productId?.name || 'Produto';
+        doc.fontSize(10).text(`${productName} - Qtd: ${item.quantity} - Preço Un.: R$ ${item.price.toFixed(2)}`);
+        
+        if (item.totalTaxAmount > 0) {
+          doc.fontSize(8).fillColor('#666').text(
+            `Impostos: ICMS: R$ ${item.icmsAmount?.toFixed(2) || '0.00'} | IPI: R$ ${item.ipiAmount?.toFixed(2) || '0.00'} | ` +
+            `PIS: R$ ${item.pisAmount?.toFixed(2) || '0.00'} | COFINS: R$ ${item.cofinsAmount?.toFixed(2) || '0.00'}`
+          ).fillColor('#000');
+        }
+        doc.moveDown(0.3);
       });
 
       doc.moveDown();
-      doc.fontSize(14).text(`TOTAL: R$ ${order.totalAmount.toFixed(2)}`, { align: 'right' });
+      if (order.totalTaxAmount > 0) {
+        doc.fontSize(10).text(`Total Impostos: R$ ${order.totalTaxAmount.toFixed(2)}`, { align: 'right' });
+      }
+      doc.fontSize(14).font('Helvetica-Bold').text(`TOTAL DO PEDIDO: R$ ${order.totalAmount.toFixed(2)}`, { align: 'right' });
 
       doc.end();
     });

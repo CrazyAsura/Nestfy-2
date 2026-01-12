@@ -48,12 +48,26 @@ export class PaymentService {
         
         const realPrice = product.discountPrice || product.price;
         
+        // Cálculo de Impostos
+        const icmsAmount = (realPrice * (product.icms || 0)) / 100;
+        const ipiAmount = (realPrice * (product.ipi || 0)) / 100;
+        const pisAmount = (realPrice * (product.pis || 0)) / 100;
+        const cofinsAmount = (realPrice * (product.cofins || 0)) / 100;
+        const totalTaxAmount = icmsAmount + ipiAmount + pisAmount + cofinsAmount;
+
         return {
           id: product.id,
           name: product.name,
           price: realPrice,
           quantity: item.quantity,
           image: product.images?.[0]?.url || product.imageUrl || '',
+          taxes: {
+            icmsAmount,
+            ipiAmount,
+            pisAmount,
+            cofinsAmount,
+            totalTaxAmount,
+          }
         };
       })
     );
@@ -82,7 +96,8 @@ export class PaymentService {
           items: JSON.stringify(validatedItems.map(item => ({
             id: item.id,
             quantity: item.quantity,
-            price: item.price
+            price: item.price,
+            taxes: item.taxes,
           })))
         },
       });
@@ -91,17 +106,24 @@ export class PaymentService {
     } else {
       // Para PIX e Boleto, criamos o pedido como PENDING
       const totalAmount = validatedItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+      const totalTaxAmount = validatedItems.reduce((acc, item) => acc + (item.taxes.totalTaxAmount * item.quantity), 0);
       
       const newOrder = new this.orderModel({
         userId,
         totalAmount,
+        totalTaxAmount,
         status: OrderStatus.PENDING,
         paymentStatus: PaymentStatus.PENDING,
         paymentMethod: paymentMethod.toUpperCase(),
         items: validatedItems.map(item => ({
           productId: item.id,
           quantity: item.quantity,
-          price: item.price
+          price: item.price,
+          icmsAmount: item.taxes.icmsAmount,
+          ipiAmount: item.taxes.ipiAmount,
+          pisAmount: item.taxes.pisAmount,
+          cofinsAmount: item.taxes.cofinsAmount,
+          totalTaxAmount: item.taxes.totalTaxAmount,
         }))
       });
 
@@ -112,7 +134,12 @@ export class PaymentService {
           orderId: savedOrder._id,
           productId: item.id,
           quantity: item.quantity,
-          price: item.price
+          price: item.price,
+          icmsAmount: item.taxes.icmsAmount,
+          ipiAmount: item.taxes.ipiAmount,
+          pisAmount: item.taxes.pisAmount,
+          cofinsAmount: item.taxes.cofinsAmount,
+          totalTaxAmount: item.taxes.totalTaxAmount,
         });
         await orderItem.save();
       }
@@ -153,11 +180,13 @@ export class PaymentService {
 
       const items = JSON.parse(itemsMetadata);
       const totalAmount = (session.amount_total || 0) / 100;
+      const totalTaxAmount = items.reduce((acc: number, item: any) => acc + (item.taxes?.totalTaxAmount * item.quantity || 0), 0);
 
       // 1. Criar o pedido no banco de dados
       const newOrder = new this.orderModel({
         userId,
         totalAmount,
+        totalTaxAmount,
         status: OrderStatus.PROCESSING,
         paymentStatus: PaymentStatus.COMPLETED,
         orderNumber: `ORD-${Date.now()}`,
@@ -171,6 +200,11 @@ export class PaymentService {
         productId: item.id,
         quantity: item.quantity,
         price: item.price,
+        icmsAmount: item.taxes?.icmsAmount || 0,
+        ipiAmount: item.taxes?.ipiAmount || 0,
+        pisAmount: item.taxes?.pisAmount || 0,
+        cofinsAmount: item.taxes?.cofinsAmount || 0,
+        totalTaxAmount: item.taxes?.totalTaxAmount || 0,
       }));
 
       await this.orderItemModel.insertMany(orderItems);

@@ -154,6 +154,10 @@ export class AdminService {
       images,
       price: Number(data.price),
       stock: Number(data.stock),
+      icms: data.icms !== undefined ? Number(data.icms) : 18,
+      ipi: data.ipi !== undefined ? Number(data.ipi) : 5,
+      pis: data.pis !== undefined ? Number(data.pis) : 1.65,
+      cofins: data.cofins !== undefined ? Number(data.cofins) : 7.6,
     });
 
     return product.save();
@@ -166,6 +170,10 @@ export class AdminService {
     }
     if (data.price) updateData.price = Number(data.price);
     if (data.stock) updateData.stock = Number(data.stock);
+    if (data.icms !== undefined) updateData.icms = Number(data.icms);
+    if (data.ipi !== undefined) updateData.ipi = Number(data.ipi);
+    if (data.pis !== undefined) updateData.pis = Number(data.pis);
+    if (data.cofins !== undefined) updateData.cofins = Number(data.cofins);
 
     // Sincronizar images com imageUrl no update
     if (data.imageUrl) {

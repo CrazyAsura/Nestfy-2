@@ -64,6 +64,19 @@ export class Product {
   @Prop({ type: Boolean, default: true })
   isActive: boolean;
 
+  // Impostos (Percentuais)
+  @Prop({ type: Number, default: 18 }) // Padrão ICMS SP aprox
+  icms: number;
+
+  @Prop({ type: Number, default: 5 }) // Padrão IPI
+  ipi: number;
+
+  @Prop({ type: Number, default: 1.65 }) // Padrão PIS
+  pis: number;
+
+  @Prop({ type: Number, default: 7.6 }) // Padrão COFINS
+  cofins: number;
+
   @Prop({ type: Date, default: null })
   deletedAt: Date | null;
 }

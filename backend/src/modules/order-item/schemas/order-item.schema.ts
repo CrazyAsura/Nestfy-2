@@ -18,6 +18,22 @@ export class OrderItem {
 
   @Prop({ type: String, required: true, index: true })
   productId: string;
+
+  // Valores de Impostos Calculados
+  @Prop({ type: Number, default: 0 })
+  icmsAmount: number;
+
+  @Prop({ type: Number, default: 0 })
+  ipiAmount: number;
+
+  @Prop({ type: Number, default: 0 })
+  pisAmount: number;
+
+  @Prop({ type: Number, default: 0 })
+  cofinsAmount: number;
+
+  @Prop({ type: Number, default: 0 })
+  totalTaxAmount: number;
 }
 
 export const OrderItemSchema = SchemaFactory.createForClass(OrderItem);

@@ -14,6 +14,9 @@ export class Order {
   @Prop({ type: Number, required: true })
   totalAmount: number;
 
+  @Prop({ type: Number, default: 0 })
+  totalTaxAmount: number;
+
   @Prop({
     type: String,
     enum: OrderStatus,

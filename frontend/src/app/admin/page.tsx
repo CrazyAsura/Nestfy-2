@@ -138,7 +138,11 @@ export default function AdminPage() {
     categoryId: '',
     brandId: '',
     materialId: '',
-    imageUrl: ''
+    imageUrl: '',
+    icms: 18,
+    ipi: 5,
+    pis: 1.65,
+    cofins: 7.6
   });
 
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
@@ -256,7 +260,11 @@ export default function AdminPage() {
       categoryId: product.categoryId || '',
       brandId: product.brandId || '',
       materialId: product.materialId || '',
-      imageUrl: product.imageUrl || product.images?.[0]?.url || ''
+      imageUrl: product.imageUrl || product.images?.[0]?.url || '',
+      icms: product.icms ?? 18,
+      ipi: product.ipi ?? 5,
+      pis: product.pis ?? 1.65,
+      cofins: product.cofins ?? 7.6
     });
   } else {
     setEditingProduct(null);
@@ -268,7 +276,11 @@ export default function AdminPage() {
       categoryId: '',
       brandId: '',
       materialId: '',
-      imageUrl: ''
+      imageUrl: '',
+      icms: 18,
+      ipi: 5,
+      pis: 1.65,
+      cofins: 7.6
     });
   }
     setIsProductDialogOpen(true);
@@ -782,6 +794,49 @@ export default function AdminPage() {
                       value={productFormData.imageUrl}
                       onChange={(e) => setProductFormData({ ...productFormData, imageUrl: e.target.value })}
                       helperText="Cole aqui o link da imagem do produto"
+                    />
+                  </Grid>
+
+                  <Grid size={{ xs: 12 }}>
+                    <Divider sx={{ my: 1 }}>
+                      <Chip label="Impostos (%)" size="small" />
+                    </Divider>
+                  </Grid>
+
+                  <Grid size={{ xs: 12, md: 3 }}>
+                    <TextField 
+                      label="ICMS (%)" 
+                      type="number"
+                      fullWidth 
+                      value={productFormData.icms}
+                      onChange={(e) => setProductFormData({ ...productFormData, icms: parseFloat(e.target.value) })}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, md: 3 }}>
+                    <TextField 
+                      label="IPI (%)" 
+                      type="number"
+                      fullWidth 
+                      value={productFormData.ipi}
+                      onChange={(e) => setProductFormData({ ...productFormData, ipi: parseFloat(e.target.value) })}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, md: 3 }}>
+                    <TextField 
+                      label="PIS (%)" 
+                      type="number"
+                      fullWidth 
+                      value={productFormData.pis}
+                      onChange={(e) => setProductFormData({ ...productFormData, pis: parseFloat(e.target.value) })}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, md: 3 }}>
+                    <TextField 
+                      label="COFINS (%)" 
+                      type="number"
+                      fullWidth 
+                      value={productFormData.cofins}
+                      onChange={(e) => setProductFormData({ ...productFormData, cofins: parseFloat(e.target.value) })}
                     />
                   </Grid>
                 </Grid>

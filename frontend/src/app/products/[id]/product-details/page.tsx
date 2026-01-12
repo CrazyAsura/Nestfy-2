@@ -257,6 +257,37 @@ export default function ProductDetails() {
                             </Typography>
                         )}
 
+                        <Box sx={{ mt: 2, mb: 3, p: 2, borderRadius: 2, border: '1px dashed', borderColor: 'divider', bgcolor: 'rgba(0,0,0,0.02)' }}>
+                            <Typography variant="subtitle2" fontWeight="bold" color="text.secondary" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <VerifiedUser sx={{ fontSize: 18 }} /> Detalhes dos Impostos (Inclusos)
+                            </Typography>
+                            <Grid container spacing={1}>
+                                <Grid size={{ xs: 6, sm: 3 }}>
+                                    <Typography variant="caption" display="block" color="text.secondary">ICMS</Typography>
+                                    <Typography variant="body2" fontWeight="medium">{product.icms || 18}%</Typography>
+                                </Grid>
+                                <Grid size={{ xs: 6, sm: 3 }}>
+                                    <Typography variant="caption" display="block" color="text.secondary">IPI</Typography>
+                                    <Typography variant="body2" fontWeight="medium">{product.ipi || 5}%</Typography>
+                                </Grid>
+                                <Grid size={{ xs: 6, sm: 3 }}>
+                                    <Typography variant="caption" display="block" color="text.secondary">PIS</Typography>
+                                    <Typography variant="body2" fontWeight="medium">{product.pis || 1.65}%</Typography>
+                                </Grid>
+                                <Grid size={{ xs: 6, sm: 3 }}>
+                                    <Typography variant="caption" display="block" color="text.secondary">COFINS</Typography>
+                                    <Typography variant="body2" fontWeight="medium">{product.cofins || 7.6}%</Typography>
+                                </Grid>
+                                <Grid size={{ xs: 12 }}>
+                                    <Typography variant="caption" color="primary" fontWeight="bold">
+                                        Total em impostos: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
+                                            ((product.discountPrice || product.price) * ((product.icms || 18) + (product.ipi || 5) + (product.pis || 1.65) + (product.cofins || 7.6))) / 100
+                                        )}
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+                        </Box>
+
                         <Typography variant="body1" color="text.secondary" mb={4} lineHeight={1.8}>
                             {product.description}
                         </Typography>

@@ -45,6 +45,7 @@ interface Order {
     id: string;
     orderNumber: string;
     totalAmount: number;
+    totalTaxAmount?: number;
     status: string;
     paymentStatus: string;
     createdAt: string;
@@ -171,6 +172,11 @@ export default function OrdersPage() {
                                                 <Typography variant="body1" fontWeight={900} color="primary">
                                                     {formatPrice(order.totalAmount)}
                                                 </Typography>
+                                                {order.totalTaxAmount && order.totalTaxAmount > 0 && (
+                                                    <Typography variant="caption" color="text.secondary" display="block">
+                                                        (Incl. {formatPrice(order.totalTaxAmount)} de impostos)
+                                                    </Typography>
+                                                )}
                                             </Grid>
                                             <Grid size={{ xs: 12, sm: 2 }} sx={{ textAlign: { sm: 'right' } }}>
                                                 <Chip 
