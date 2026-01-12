@@ -8,6 +8,7 @@ import { User, UserDocument } from '../user/schemas/user.schema';
 import { RefreshToken, RefreshTokenDocument } from '../refresh-token/schemas/refresh-token.schema';
 import { Address, AddressDocument } from '../address/schemas/address.schema';
 import { Phone, PhoneDocument } from '../phone/schemas/phone.schema';
+import { Cart, CartDocument } from '../cart/schemas/cart.schema';
 import { Role, UserType, DDI, DDD } from '../../constants/enums';
 import { LoginDto } from './dto/login.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -27,6 +28,8 @@ export class AuthService {
     private readonly addressModel: Model<AddressDocument>,
     @InjectModel(Phone.name)
     private readonly phoneModel: Model<PhoneDocument>,
+    @InjectModel(Cart.name)
+    private readonly cartModel: Model<CartDocument>,
     private readonly jwtService: JwtService,
     @InjectConnection() private readonly connection: Connection,
   ) {}
@@ -285,12 +288,26 @@ export class AuthService {
     }).exec();
 
     if (existingUser) {
-      if (existingUser.deletedAt) {
-        // Se o usuário foi "removido" (soft delete), permitimos criar de novo
-        // mas precisamos limpar o email/documento do antigo para não dar conflito se for o mesmo
-        // ou simplesmente atualizar o antigo. Por segurança, vamos apenas tratar como se não existisse
-        // se o email for o mesmo. No MongoDB, unique index impede duplicados.
-        // O ideal é remover permanentemente ou mudar o email do antigo.
+      // @ts-ignore - Propriedade deletedAt pode existir em documentos antigos no MongoDB
+      if (existingUser.deletedAt || (existingUser as any).deletedAt) {
+        this.logger.log(`Usuário antigo (soft-deleted) encontrado com email/documento: ${email}/${document}. Removendo permanentemente para permitir novo registro.`);
+        
+        // Se o usuário foi "removido" (soft delete) anteriormente, vamos removê-lo 
+        // permanentemente agora para que o novo registro não falhe por duplicidade.
+        const oldUserId = (existingUser as any)._id || existingUser.id;
+        
+        // Limpar dados relacionados do usuário antigo
+        await Promise.all([
+          this.addressModel.deleteMany({ userId: oldUserId }).exec(),
+          this.phoneModel.deleteMany({ userId: oldUserId }).exec(),
+          this.cartModel.deleteMany({ userId: oldUserId }).exec(),
+          this.refreshTokenModel.deleteMany({ userId: oldUserId }).exec(),
+        ]);
+        
+        // Deletar o usuário antigo
+        await this.userModel.findByIdAndDelete(oldUserId).exec();
+        
+        this.logger.log(`Usuário antigo ${oldUserId} removido com sucesso.`);
       } else {
         if (existingUser.isBanned) {
           throw new BadRequestException({ code: 'user_banned', message: 'Este usuário está banido permanentemente.' });
@@ -409,9 +426,9 @@ export class AuthService {
         throw new UnauthorizedException('E-mail ou senha incorretos.');
       }
 
-      this.logger.log(`[DEBUG LOGIN] Usuário encontrado: ID=${user.id}, Email=${user.email}, Role=${user.role}, Ativo=${user.isActive}, Deletado=${!!user.deletedAt}`);
+      this.logger.log(`[DEBUG LOGIN] Usuário encontrado: ID=${user.id}, Email=${user.email}, Role=${user.role}, Ativo=${user.isActive}`);
 
-      if (!user.isActive && !user.deletedAt) {
+      if (!user.isActive) {
         this.logger.warn(`[DEBUG LOGIN] Conta desativada: ${email}`);
         throw new UnauthorizedException('Esta conta está desativada. Entre em contato com o suporte.');
       }
@@ -475,9 +492,8 @@ export class AuthService {
       existingAdmin.password = hashedPassword;
       existingAdmin.isActive = true;
       existingAdmin.role = Role.ADMIN;
-      existingAdmin.deletedAt = null; // Restaurar se estiver deletado
       await existingAdmin.save();
-      return { message: 'Administrador atualizado, ativado e restaurado com sucesso' };
+      return { message: 'Administrador atualizado e ativado com sucesso' };
     }
 
     this.logger.log(`[SEED] Criando novo administrador: ${adminEmail}`);
@@ -506,7 +522,6 @@ export class AuthService {
           adminByDoc.password = hashedPassword;
           adminByDoc.isActive = true;
           adminByDoc.role = Role.ADMIN;
-          adminByDoc.deletedAt = null;
           await adminByDoc.save();
           return { message: 'Administrador atualizado via documento com sucesso' };
         }

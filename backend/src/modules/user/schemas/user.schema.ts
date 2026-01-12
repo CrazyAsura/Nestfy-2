@@ -45,9 +45,6 @@ export class User {
 
   @Prop({ type: String, default: null })
   lastIp: string;
-
-  @Prop({ type: Date, default: null })
-  deletedAt: Date | null;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

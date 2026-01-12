@@ -10,6 +10,7 @@ import { RefreshToken, RefreshTokenSchema } from '../refresh-token/schemas/refre
 import { User, UserSchema } from '../user/schemas/user.schema';
 import { Address, AddressSchema } from '../address/schemas/address.schema';
 import { Phone, PhoneSchema } from '../phone/schemas/phone.schema';
+import { Cart, CartSchema } from '../cart/schemas/cart.schema';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { Phone, PhoneSchema } from '../phone/schemas/phone.schema';
       { name: RefreshToken.name, schema: RefreshTokenSchema },
       { name: Address.name, schema: AddressSchema },
       { name: Phone.name, schema: PhoneSchema },
+      { name: Cart.name, schema: CartSchema },
     ]),
     UserModule,
   ],
