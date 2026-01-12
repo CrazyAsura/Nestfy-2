@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 import Barcode from 'react-barcode'; // Biblioteca adicionada
 import { api } from '@/app/libs/api/services/axios';
 import { API_ROUTES } from '@/app/libs/api/routes';
+import PrintableBoleto from './PrintableBoleto';
 
 interface BoletoPaymentProps {
     amount: number;
@@ -129,90 +130,25 @@ export default function BoletoPayment({ amount, orderId }: BoletoPaymentProps) {
                     bgcolor: '#fff',
                     maxWidth: '850px', 
                     margin: '0 auto',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+                    '@media print': {
+                        border: 'none',
+                        p: 0,
+                        m: 0,
+                        boxShadow: 'none'
+                    }
                 }}
             >
-                {/* Visualização Simplificada do Boleto */}
-                <Box ref={boletoRef} sx={{ color: '#000', fontFamily: 'monospace' }}>
-                    
-                    {/* CABEÇALHO COM LOGO */}
-                    <Box display="flex" alignItems="center" borderBottom="2px solid #000" pb={1} mb={2}>
-                        <Box sx={{ width: 150, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRight: '2px solid #000', pr: 2 }}>
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Bradesco_logo.svg/2560px-Bradesco_logo.svg.png" alt="Banco" style={{maxHeight: 30, objectFit: 'contain'}} />
-                        </Box>
-                        <Typography variant="h5" fontWeight="900" sx={{ borderRight: '2px solid #000', px: 2, height: 40, display: 'flex', alignItems: 'center' }}>
-                            237-2
-                        </Typography>
-                        <Typography variant="body1" fontWeight="bold" sx={{ flex: 1, textAlign: 'right', fontSize: '1.1rem', letterSpacing: 0.5 }}>
-                            {linhaDigitavel}
-                        </Typography>
-                    </Box>
-
-                    {/* CONTEÚDO DO BOLETO */}
-                    <Box sx={{ border: '1px solid #000', mb: 2 }}>
-                        <Box display="flex">
-                            <GridContainer label="Local de Pagamento" value="PAGÁVEL EM QUALQUER BANCO ATÉ O VENCIMENTO" width="75%" />
-                            <GridContainer label="Vencimento" value={new Date(new Date().setDate(new Date().getDate() + 3)).toLocaleDateString('pt-BR')} width="25%" lastInRow highlight />
-                        </Box>
-
-                        <Box display="flex">
-                            <GridContainer label="Beneficiário" value="NESTFY ECOMMERCE LTDA - CNPJ: 00.000.000/0001-00" width="75%" />
-                            <GridContainer label="Agência/Código Beneficiário" value="1234 / 56789-0" width="25%" lastInRow />
-                        </Box>
-
-                        <Box display="flex">
-                            <GridContainer label="Data do Documento" value={new Date().toLocaleDateString('pt-BR')} width="20%" />
-                            <GridContainer label="Número do Documento" value={orderId.substring(0, 10)} width="25%" />
-                            <GridContainer label="Espécie Doc." value="DM" width="15%" />
-                            <GridContainer label="Aceite" value="N" width="15%" />
-                            <GridContainer label="Nosso Número" value="00000123-4" width="25%" lastInRow />
-                        </Box>
-
-                        <Box display="flex">
-                            <GridContainer label="Carteira" value="09" width="20%" />
-                            <GridContainer label="Espécie" value="R$" width="20%" />
-                            <GridContainer label="Quantidade" value="" width="25%" />
-                            <GridContainer label="(=) Valor do Documento" 
-                                value={new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(amount)} 
-                                width="35%" 
-                                highlight 
-                                lastInRow 
-                            />
-                        </Box>
-
-                        <Box display="flex" sx={{ minHeight: 80 }}>
-                            <Box sx={{ width: '100%', p: 1 }}>
-                                <Typography variant="caption" display="block" sx={{ fontWeight: 'bold', fontSize: '0.6rem' }}>Instruções (Texto de responsabilidade do beneficiário)</Typography>
-                                <Typography variant="body2" sx={{ mt: 1, fontSize: '0.8rem' }}>SR. CAIXA, NÃO RECEBER APÓS O VENCIMENTO.</Typography>
-                                <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>REFERENTE AO PEDIDO #{orderId}</Typography>
-                                {orderData?.totalTaxAmount > 0 && (
-                                    <Typography variant="body2" sx={{ fontSize: '0.75rem', mt: 1, fontStyle: 'italic', color: 'text.secondary' }}>
-                                        Valor aproximado dos tributos: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(orderData.totalTaxAmount)} ({((orderData.totalTaxAmount / orderData.totalAmount) * 100).toFixed(2)}%) conforme Lei 12.741/12.
-                                    </Typography>
-                                )}
-                            </Box>
-                        </Box>
-
-                        <Box sx={{ borderTop: '1px solid #000', p: 1 }}>
-                            <Typography variant="caption" display="block" sx={{ fontWeight: 'bold', fontSize: '0.6rem' }}>Pagador</Typography>
-                            <Typography variant="body2" sx={{ fontWeight: 'bold', fontSize: '0.85rem' }}>CLIENTE NESTFY (CPF: 000.000.000-00)</Typography>
-                        </Box>
-                    </Box>
-
-                    {/* CÓDIGO DE BARRAS */}
-                    <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                        {mounted && (
-                            <Barcode 
-                                value={barcodeValue}
-                                format="ITF"
-                                width={1.8}
-                                height={80}
-                                displayValue={false}
-                                margin={0}
-                            />
-                        )}
-                    </Box>
-                </Box>
+                <PrintableBoleto 
+                    linhaDigitavel={linhaDigitavel}
+                    codigoBarras={barcodeValue}
+                    valor={amount}
+                    vencimento={new Date(new Date().setDate(new Date().getDate() + 3)).toLocaleDateString('pt-BR')}
+                    beneficiario="NESTFY ECOMMERCE LTDA - CNPJ: 00.000.000/0001-00"
+                    pagador="CLIENTE NESTFY (CPF: 000.000.000-00)"
+                    pedidoId={orderId}
+                    totalTaxAmount={orderData?.totalTaxAmount}
+                />
             </Paper>
 
             <Stack direction="column" spacing={2} className="no-print">
@@ -263,49 +199,6 @@ export default function BoletoPayment({ amount, orderId }: BoletoPaymentProps) {
                     {loading ? 'Confirmando...' : 'Já realizei o pagamento'}
                 </Button>
             </Stack>
-        </Box>
-    );
-}
-
-// Componente auxiliar ajustado para bordas perfeitas (colapso de bordas)
-function GridContainer({ 
-    label, 
-    value, 
-    width, 
-    highlight = false, 
-    lastInRow = false,
-    noBorderLeft = false
-}: { 
-    label: string, 
-    value: string, 
-    width: string, 
-    highlight?: boolean,
-    lastInRow?: boolean,
-    noBorderLeft?: boolean
-}) {
-    return (
-        <Box 
-            sx={{
-                width: width,
-                borderRight: lastInRow ? 'none' : '1px solid #000',
-                borderBottom: '1px solid #000',
-                borderLeft: noBorderLeft ? 'none' : undefined,
-                p: 0.5,
-                bgcolor: highlight ? '#f5f5f5' : 'transparent',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                printColorAdjust: 'exact',
-                WebkitPrintColorAdjust: 'exact',
-                minHeight: 35
-            }}
-        >
-            <Typography variant="caption" display="block" sx={{ fontSize: '0.55rem', fontWeight: 'bold', textTransform: 'uppercase', lineHeight: 1, mb: 0.2, color: '#333' }}>
-                {label}
-            </Typography>
-            <Typography variant="body2" sx={{ fontWeight: highlight ? 'bold' : 'normal', fontSize: '0.75rem', lineHeight: 1.1, fontFamily: 'monospace' }}>
-                {value}&nbsp;
-            </Typography>
         </Box>
     );
 }
