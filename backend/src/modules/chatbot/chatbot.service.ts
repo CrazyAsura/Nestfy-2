@@ -63,6 +63,37 @@ export class ChatbotService implements OnModuleInit {
           temperature: 0.7,
         });
         this.logger.log(`LocalAI inicializado em ${baseUrl} com modelo ${model}`);
+      } else if (provider === 'openai') {
+        const apiKey = this.configService.get<string>('OPENAI_API_KEY');
+        const model = this.configService.get<string>('OPENAI_MODEL') || "gpt-3.5-turbo";
+        
+        if (!apiKey) {
+          throw new Error('OPENAI_API_KEY não configurada');
+        }
+
+        this.llm = new ChatOpenAI({
+          openAIApiKey: apiKey,
+          modelName: model,
+          temperature: 0.7,
+        });
+        this.logger.log(`OpenAI inicializado com modelo ${model}`);
+      } else if (provider === 'groq') {
+        const apiKey = this.configService.get<string>('GROQ_API_KEY');
+        const model = this.configService.get<string>('GROQ_MODEL') || "llama3-8b-8192";
+        
+        if (!apiKey) {
+          throw new Error('GROQ_API_KEY não configurada');
+        }
+
+        this.llm = new ChatOpenAI({
+          openAIApiKey: apiKey,
+          configuration: {
+            baseURL: "https://api.groq.com/openai/v1",
+          },
+          modelName: model,
+          temperature: 0.7,
+        });
+        this.logger.log(`Groq AI inicializado com modelo ${model}`);
       }
     } catch (error) {
       this.logger.error('Erro ao inicializar LLM:', error.message);
