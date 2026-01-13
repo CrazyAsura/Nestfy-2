@@ -9,7 +9,7 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 20
-      - key: PORT
-        value: 8080
       - key: FRONTEND_URL
         value: https://nestfy-1.vercel.app
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=450
