@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as adminService from "../api/services/admin.services";
+import * as cjService from "../api/services/cj.service";
 import { Product } from "../types/product";
 import { Category } from "../types/category";
 import { Profile } from "../types/profile";
@@ -9,6 +10,17 @@ export function useAdminStats() {
     return useQuery({
         queryKey: ['admin, stats'],
         queryFn: adminService.getDashboardStats,
+    });
+}
+
+export function useClearSampleData() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: adminService.clearSampleData,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin', 'products'] });
+            queryClient.invalidateQueries({ queryKey: ['admin, stats'] });
+        },
     });
 }
 
@@ -83,6 +95,24 @@ export function useAdminActivityLogs(page: number = 1, limit: number = 10) {
     return useQuery({
         queryKey: ['admin', 'activity-logs', page, limit],
         queryFn: () => adminService.getActivityLogs(page, limit),
+    });
+}
+
+export function useCjProducts(page: number = 1, size: number = 20) {
+    return useQuery({
+        queryKey: ['cj', 'products', page, size],
+        queryFn: () => cjService.fetchCjProducts(page, size),
+    });
+}
+
+export function useImportCjProduct() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ pid, categoryId }: { pid: string, categoryId: string }) =>
+            cjService.importCjProduct(pid, categoryId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin', 'products'] });
+        },
     });
 }
 

@@ -18,6 +18,11 @@ export class AdminController {
     return this.adminService.getDashboardStats();
   }
 
+  @Post('clear-sample-data')
+  clearSampleData() {
+    return this.adminService.clearSampleData();
+  }
+
   @Get('orders')
   getAllOrders() {
     return this.adminService.getAllOrders();

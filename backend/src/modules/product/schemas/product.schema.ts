@@ -64,6 +64,21 @@ export class Product {
   @Prop({ type: Boolean, default: true })
   isActive: boolean;
 
+  @Prop({ type: Boolean, default: false })
+  isDropshipping: boolean;
+
+  @Prop({ type: String, default: null })
+  cjProductId: string | null;
+
+  @Prop({ type: String, default: 'manual' })
+  vendor: string;
+
+  @Prop({ type: Number, default: 0 })
+  costPrice: number;
+
+  @Prop({ type: String, default: null })
+  cjSku: string | null;
+
   // Impostos (Percentuais)
   @Prop({ type: Number, default: 18 }) // Padrão ICMS SP aprox
   icms: number;

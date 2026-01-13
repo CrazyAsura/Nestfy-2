@@ -22,6 +22,7 @@ export class ProductController {
     @Query('maxPrice') maxPrice?: number,
     @Query('sortBy') sortBy?: string,
     @Query('order') order?: 'asc' | 'desc',
+    @Query('isDropshipping') isDropshipping?: string,
   ) {
     return this.productService.findAll(
       page, 
@@ -31,7 +32,8 @@ export class ProductController {
       minPrice, 
       maxPrice, 
       sortBy, 
-      order
+      order,
+      isDropshipping === 'true' ? true : isDropshipping === 'false' ? false : undefined
     );
   }
 

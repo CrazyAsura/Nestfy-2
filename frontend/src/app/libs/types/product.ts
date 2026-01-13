@@ -22,6 +22,11 @@ export type Product = {
     imageUrl?: string;
     images?: { url: string; isMain: boolean }[];
     isActive: boolean;
+    isDropshipping: boolean;
+    cjProductId?: string;
+    vendor: string;
+    costPrice: number;
+    cjSku?: string;
     createdAt: string;
     updatedAt: string;
 }

@@ -11,6 +11,7 @@ import {
   CircularProgress,
   Skeleton,
   Container,
+  Chip,
 } from '@mui/material';
 import { useProducts } from '@/app/libs/hooks/useProducts';
 import { motion, Variants, AnimatePresence } from 'framer-motion';
@@ -18,6 +19,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useDispatch } from 'react-redux';
 import { selectProduct } from '@/app/libs/stores/slices/products.slice';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 
 const MotionCard = motion(Card);
 const MotionGrid = motion(Grid);
@@ -175,6 +177,23 @@ export default function ListProducts({
                                             bgcolor: 'rgba(0,0,0,0.02)',
                                             transition: 'background-color 0.4s ease'
                                         }} />
+                                        {product.isDropshipping && (
+                                            <Chip
+                                                icon={<LocalShippingIcon sx={{ fontSize: '1rem !important' }} />}
+                                                label="Envio Internacional"
+                                                size="small"
+                                                sx={{
+                                                    position: 'absolute',
+                                                    top: 10,
+                                                    right: 10,
+                                                    bgcolor: 'rgba(255, 255, 255, 0.9)',
+                                                    backdropFilter: 'blur(4px)',
+                                                    fontWeight: 600,
+                                                    fontSize: '0.7rem',
+                                                    height: 24,
+                                                }}
+                                            />
+                                        )}
                                     </Box>
 
                                     <CardContent sx={{ p: 0, textAlign: 'center' }}>

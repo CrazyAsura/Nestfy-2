@@ -10,7 +10,8 @@ export async function fetchProducts(
     minPrice?: number,
     maxPrice?: number,
     sortBy?: string,
-    order?: 'asc' | 'desc'
+    order?: 'asc' | 'desc',
+    isDropshipping?: boolean,
 ): Promise<ProductResponse> {
     const response = await api.get(API_ROUTES.PRODUCTS.BASE, {
         params: {
@@ -21,7 +22,8 @@ export async function fetchProducts(
             minPrice,
             maxPrice,
             sortBy,
-            order
+            order,
+            isDropshipping,
         }
     });
 

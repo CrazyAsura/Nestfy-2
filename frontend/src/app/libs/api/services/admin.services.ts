@@ -9,6 +9,11 @@ export async function getDashboardStats() {
     return response.data;
 }
 
+export async function clearSampleData() {
+    const response = await api.post(API_ROUTES.ADMIN.CLEAR_SAMPLE_DATA);
+    return response.data;
+}
+
 export async function getRecentOrders() {
     const response = await api.get(API_ROUTES.ADMIN.RECENTE_ORDERS);
     return response.data;

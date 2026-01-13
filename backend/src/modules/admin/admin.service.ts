@@ -83,6 +83,15 @@ export class AdminService {
     return populatedOrders;
   }
 
+  async clearSampleData() {
+    // Remove produtos que não são de dropshipping
+    const result = await this.productModel.deleteMany({ isDropshipping: { $ne: true } }).exec();
+    return { 
+      message: 'Dados de exemplo removidos com sucesso', 
+      deletedCount: result.deletedCount 
+    };
+  }
+
   async getAllUsers() {
     const users = await this.userModel.find().exec();
     return users.map(u => u.toObject());

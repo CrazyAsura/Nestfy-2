@@ -32,6 +32,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { AdminModule } from './modules/admin/admin.module';
 import { LogModule } from './modules/log/log.module';
 import { FinanceModule } from './modules/finance/finance.module';
+import { CjDropshippingModule } from './modules/cj-dropshipping/cj-dropshipping.module';
 import { UserActivityInterceptor } from './common/middleware/interceptors/userActivityInterceptor';
 
 
@@ -115,6 +116,7 @@ import { UserActivityInterceptor } from './common/middleware/interceptors/userAc
     AdminModule,
     LogModule,
     FinanceModule,
+    CjDropshippingModule,
   ],
   controllers: [AppController],
   providers: [

@@ -63,6 +63,25 @@ export class CreateProductDto {
     @IsOptional()
     color?: string;
 
+    @IsOptional()
+    isDropshipping?: boolean;
+
+    @IsString()
+    @IsOptional()
+    cjProductId?: string;
+
+    @IsString()
+    @IsOptional()
+    vendor?: string;
+
+    @IsNumber()
+    @IsOptional()
+    costPrice?: number;
+
+    @IsString()
+    @IsOptional()
+    cjSku?: string;
+
     @IsArray()
     @IsOptional()
     @ValidateNested({ each: true })

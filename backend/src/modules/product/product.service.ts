@@ -60,12 +60,17 @@ export class ProductService {
     minPrice?: number,
     maxPrice?: number,
     sortBy?: string,
-    order: 'asc' | 'desc' = 'desc'
+    order: 'asc' | 'desc' = 'desc',
+    isDropshipping?: boolean,
   ) { 
     const currentPage = Math.max(Number(page), 1);
     const perPage = Math.min(Math.max(Number(limit), 1), 100);
 
     const query: any = {};
+
+    if (isDropshipping !== undefined) {
+      query.isDropshipping = isDropshipping;
+    }
 
     if (search) {
       query.$or = [

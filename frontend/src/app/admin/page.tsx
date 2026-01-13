@@ -57,10 +57,10 @@ import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import BlockIcon from '@mui/icons-material/Block';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 
 import { 
   useAdminStats, 
@@ -79,7 +79,10 @@ import {
   useUpdateCategory,
   useBanUser,
   useUnbanUser,
-  useUpdateOrderDelivery
+  useUpdateOrderDelivery,
+  useCjProducts,
+  useImportCjProduct,
+  useClearSampleData
 } from '@/app/libs/hooks/useAdmin';
 import { Role } from '@/app/libs/types/enums';
 
@@ -106,7 +109,7 @@ import { useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-type Section = 'dashboard' | 'users' | 'products' | 'categories' | 'orders' | 'deliveries' | 'activity-logs' | 'finance';
+type Section = 'dashboard' | 'users' | 'products' | 'categories' | 'orders' | 'deliveries' | 'activity-logs' | 'finance' | 'dropshipping';
 
 export default function AdminPage() {
   const { user } = useSelector((state: any) => state.auth);
@@ -131,6 +134,7 @@ export default function AdminPage() {
   const { data: products, isLoading: productsLoading, error: productsError } = useAdminProducts();
   const { data: categories, isLoading: categoriesLoading, error: categoriesError } = useAdminCategories();
   const { data: orders, isLoading: ordersLoading, error: ordersError } = useAdminOrders();
+  const { data: cjProducts, isLoading: cjLoading } = useCjProducts(page + 1, rowsPerPage);
 
   // Mutations
   const deleteUserMutation = useDeleteUser();
@@ -144,6 +148,7 @@ export default function AdminPage() {
   const createCategoryMutation = useCreateCategory();
   const updateCategoryMutation = useUpdateCategory();
   const updateUserMutation = useUpdateUser();
+  const importCjProductMutation = useImportCjProduct();
 
   // Dialog States
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
@@ -185,11 +190,13 @@ export default function AdminPage() {
   });
 
   const updateOrderDeliveryMutation = useUpdateOrderDelivery();
+  const clearSampleDataMutation = useClearSampleData();
 
   // Search and Filter States
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
+  const [vendorFilter, setVendorFilter] = useState('ALL');
   const [roleFilter, setRoleFilter] = useState('ALL');
 
   // Error and Feedback State
@@ -293,6 +300,25 @@ export default function AdminPage() {
         onError: () => showFeedback('Erro ao excluir categoria.', 'error')
       });
     }
+  };
+
+  const handleClearSampleData = () => {
+    if (window.confirm('Tem certeza que deseja remover todos os produtos que não são de dropshipping? Esta ação não pode ser desfeita.')) {
+      clearSampleDataMutation.mutate(undefined, {
+        onSuccess: (data: any) => showFeedback(`${data.message}. ${data.deletedCount} itens removidos.`, 'success'),
+        onError: (error: any) => showFeedback(`Erro ao limpar dados: ${error.response?.data?.message || error.message}`, 'error')
+      });
+    }
+  };
+
+  const handleImportCjProduct = (pid: string) => {
+    const categoryId = prompt('Digite o ID da categoria para este produto:');
+    if (!categoryId) return;
+
+    importCjProductMutation.mutate({ pid, categoryId }, {
+      onSuccess: () => showFeedback('Produto importado com sucesso!', 'success'),
+      onError: (error: any) => showFeedback(`Erro ao importar produto: ${error.response?.data?.message || error.message}`, 'error')
+    });
   };
 
   const handleOpenCategoryDialog = (category?: any) => {
@@ -470,6 +496,27 @@ export default function AdminPage() {
                   </Typography>
                 </CardContent>
               </Card>
+            </Grid>
+
+            <Grid size={{ xs: 12 }}>
+              <Paper sx={{ p: 3, border: '1px solid', borderColor: 'warning.main', bgcolor: 'rgba(237, 108, 2, 0.05)' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box>
+                    <Typography variant="h6" color="warning.main" gutterBottom>Manutenção do Sistema</Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      Remova os produtos de exemplo (seed) que não são reais. Isso deixará apenas os produtos importados via Dropshipping ou criados manualmente de forma definitiva.
+                    </Typography>
+                  </Box>
+                  <Button 
+                    variant="outlined" 
+                    color="warning" 
+                    onClick={handleClearSampleData}
+                    disabled={clearSampleDataMutation.isPending}
+                  >
+                    {clearSampleDataMutation.isPending ? <CircularProgress size={24} /> : 'Limpar Dados de Exemplo'}
+                  </Button>
+                </Box>
+              </Paper>
             </Grid>
             
             <Grid size={{ xs: 12, md: 8 }}>
@@ -734,7 +781,9 @@ export default function AdminPage() {
         const filteredProducts = products?.filter((product: any) => {
           const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
           const matchesCategory = categoryFilter === 'ALL' || product.categoryId === categoryFilter;
-          return matchesSearch && matchesCategory;
+          const matchesVendor = vendorFilter === 'ALL' || 
+                               (vendorFilter === 'DROPSHIPPING' ? product.isDropshipping : !product.isDropshipping);
+          return matchesSearch && matchesCategory && matchesVendor;
         });
 
         return (
@@ -765,6 +814,18 @@ export default function AdminPage() {
                   {categories?.map((cat: any) => (
                     <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>
                   ))}
+                </Select>
+              </FormControl>
+              <FormControl size="small" sx={{ minWidth: 150 }}>
+                <InputLabel>Origem</InputLabel>
+                <Select
+                  value={vendorFilter}
+                  label="Origem"
+                  onChange={(e) => setVendorFilter(e.target.value)}
+                >
+                  <MenuItem value="ALL">Todas</MenuItem>
+                  <MenuItem value="MANUAL">Manual</MenuItem>
+                  <MenuItem value="DROPSHIPPING">Dropshipping</MenuItem>
                 </Select>
               </FormControl>
               <Box sx={{ flexGrow: 1 }} />
@@ -801,7 +862,12 @@ export default function AdminPage() {
                               sx={{ width: 40, height: 40, borderRadius: 1, objectFit: 'cover' }}
                             />
                           )}
-                          <Typography variant="body2" fontWeight="medium">{product.name}</Typography>
+                          <Box>
+                            <Typography variant="body2" fontWeight="medium">{product.name}</Typography>
+                            {product.isDropshipping && (
+                              <Chip label="Dropshipping" size="small" color="secondary" sx={{ height: 16, fontSize: '0.6rem' }} />
+                            )}
+                          </Box>
                         </Box>
                       </TableCell>
                       <TableCell>{product.category?.name}</TableCell>
@@ -1394,6 +1460,90 @@ export default function AdminPage() {
           </TableContainer>
         );
 
+      case 'dropshipping':
+        return (
+          <Box>
+            <Typography variant="h5" sx={{ mb: 3 }}>Integração CJ Dropshipping</Typography>
+            <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+              <TextField
+                size="small"
+                placeholder="Buscar produtos na CJ..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                sx={{ flexGrow: 1, maxWidth: 400 }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon fontSize="small" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <Box sx={{ flexGrow: 1 }} />
+              <Typography variant="caption" color="textSecondary">
+                Mostrando {cjProducts?.list?.length || 0} produtos da CJ
+              </Typography>
+            </Box>
+
+            <TableContainer component={Paper} variant="outlined">
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Produto</TableCell>
+                    <TableCell>PID</TableCell>
+                    <TableCell>Preço de Venda</TableCell>
+                    <TableCell>Ações</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {cjLoading ? (
+                    <TableRow><TableCell colSpan={4} align="center"><CircularProgress /></TableCell></TableRow>
+                  ) : cjProducts?.list?.length === 0 ? (
+                    <TableRow><TableCell colSpan={4} align="center">Nenhum produto encontrado na CJ</TableCell></TableRow>
+                  ) : cjProducts?.list?.map((product: any) => (
+                    <TableRow key={product.pid} hover>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          {product.productImage && (
+                            <Box 
+                              component="img" 
+                              src={product.productImage} 
+                              sx={{ width: 40, height: 40, borderRadius: 1, objectFit: 'cover' }}
+                            />
+                          )}
+                          <Typography variant="body2" fontWeight="medium">{product.productNameEn}</Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>{product.pid}</TableCell>
+                      <TableCell>${product.sellPrice}</TableCell>
+                      <TableCell>
+                        <Button 
+                          size="small" 
+                          variant="contained" 
+                          color="secondary"
+                          onClick={() => handleImportCjProduct(product.pid)}
+                          disabled={importCjProductMutation.isPending}
+                        >
+                          {importCjProductMutation.isPending ? <CircularProgress size={20} /> : 'Importar'}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <TablePagination
+              component="div"
+              count={cjProducts?.total || 0}
+              page={page}
+              onPageChange={handleChangePage}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              labelRowsPerPage="Itens por página"
+            />
+          </Box>
+        );
+
       default:
         return (
           <Box sx={{ textAlign: 'center', py: 8 }}>
@@ -1448,6 +1598,10 @@ export default function AdminPage() {
               <ListItemButton selected={activeSection === 'activity-logs'} onClick={() => handleSectionChange('activity-logs')} sx={{ borderRadius: 2, mb: 0.5 }}>
                 <ListItemIcon><HistoryIcon color={activeSection === 'activity-logs' ? 'primary' : 'inherit'} /></ListItemIcon>
                 <ListItemText primary="Logs de Atividade" />
+              </ListItemButton>
+              <ListItemButton selected={activeSection === 'dropshipping'} onClick={() => handleSectionChange('dropshipping')} sx={{ borderRadius: 2, mb: 0.5 }}>
+                <ListItemIcon><CloudDownloadIcon color={activeSection === 'dropshipping' ? 'primary' : 'inherit'} /></ListItemIcon>
+                <ListItemText primary="CJ Dropshipping" />
               </ListItemButton>
               <ListItemButton selected={activeSection === 'finance'} component={Link} href="/admin/finance" sx={{ borderRadius: 2, mb: 0.5 }}>
                 <ListItemIcon><AccountBalanceIcon color={activeSection === 'finance' ? 'primary' : 'inherit'} /></ListItemIcon>

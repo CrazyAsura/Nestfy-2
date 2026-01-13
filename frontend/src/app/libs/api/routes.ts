@@ -15,6 +15,7 @@ export const API_ROUTES = {
     },
     ADMIN: {
         BASE: 'admin/stats',
+        CLEAR_SAMPLE_DATA: 'admin/clear-sample-data',
         ORDERS: 'admin/orders',
         RECENTE_ORDERS: 'admin/orders/recent',
         USERS: 'admin/users',
@@ -59,5 +60,11 @@ export const API_ROUTES = {
         BY_USER: (userId: string) => `wishlist/user/${userId}`,
         ADD_ITEM: 'wishlist-item',
         REMOVE_ITEM: (id: string) => `wishlist-item/${id}`,
-    }
+    },
+    CJ_DROPSHIPPING: {
+        PRODUCTS: 'cj-dropshipping/products',
+        PRODUCT_DETAIL: (pid: string) => `cj-dropshipping/products/${pid}`,
+        INVENTORY: (pid: string) => `cj-dropshipping/inventory/${pid}`,
+        IMPORT: 'cj-dropshipping/import',
+    },
 } as const;
