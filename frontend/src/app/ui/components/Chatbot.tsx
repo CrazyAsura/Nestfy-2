@@ -52,7 +52,10 @@ export default function Chatbot() {
         const socketUrl = getSocketBaseURL();
         const socket = io(socketUrl, {
             withCredentials: true,
-            transports: ['websocket', 'polling']
+            transports: ['polling', 'websocket'], // Tenta polling primeiro se websocket falhar
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000
         });
 
         socketRef.current = socket;
