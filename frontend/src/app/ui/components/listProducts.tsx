@@ -20,6 +20,7 @@ import Link from 'next/link';
 import { useDispatch } from 'react-redux';
 import { selectProduct } from '@/app/libs/stores/slices/products.slice';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import { getUploadsURL } from '@/app/libs/api/services/axios';
 
 const MotionCard = motion(Card);
 const MotionGrid = motion(Grid);
@@ -162,7 +163,7 @@ export default function ListProducts({
                                 >
                                     <Box sx={{ position: 'relative', height: 380, overflow: 'hidden', mb: 2 }}>
                                         <Image
-                                            src={product.imageUrl || product.images?.[0]?.url || '/next.svg'}
+                                            src={getUploadsURL(product.imageUrl || product.images?.[0]?.url || '/next.svg')}
                                             alt={product.name}
                                             fill
                                             style={{ objectFit: 'cover', transition: 'transform 0.8s ease' }}

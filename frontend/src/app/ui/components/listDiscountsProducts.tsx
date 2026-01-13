@@ -19,6 +19,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useDispatch } from 'react-redux';
 import { selectProduct } from '@/app/libs/stores/slices/products.slice';
+import { getUploadsURL } from '@/app/libs/api/services/axios';
 
 const MotionCard = motion(Card);
 const MotionGrid = motion(Grid);
@@ -169,13 +170,13 @@ export default function ListDiscountsProducts() {
                                         />
                                     )}
 
-                                    <Box sx={{ position: 'relative', pt: '125%', overflow: 'hidden' }}>
-                                        <Image
-                                            src={product.imageUrl || product.images?.[0]?.url || '/images/placeholder.png'}
-                                            alt={product.name}
-                                            fill
-                                            style={{ objectFit: 'cover' }}
-                                        />
+                                    <Box sx={{ position: 'relative', height: 250 }}>
+                                            <Image
+                                                src={getUploadsURL(product.imageUrl || product.images?.[0]?.url || '/images/placeholder.png')}
+                                                alt={product.name}
+                                                fill
+                                                style={{ objectFit: 'cover' }}
+                                            />
                                     </Box>
 
                                     <CardContent sx={{ flexGrow: 1, p: 2 }}>

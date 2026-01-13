@@ -29,6 +29,7 @@ import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '@/app/libs
 import { useProfile } from '@/app/libs/hooks/useProfile';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getUploadsURL } from '@/app/libs/api/services/axios';
 import { 
     ShoppingCart, 
     Favorite, 
@@ -183,7 +184,7 @@ export default function ProductDetails() {
         );
     }
 
-    const mainImage = product.images?.[selectedImage]?.url || product.imageUrl || '/images/placeholder.png';
+    const mainImage = getUploadsURL(product.images?.[selectedImage]?.url || product.imageUrl || '/images/placeholder.png');
     const averageRating = reviews?.length 
         ? reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / reviews.length 
         : 0;
@@ -219,7 +220,7 @@ export default function ProductDetails() {
                                     }}
                                 >
                                     <Image
-                                        src={img.url}
+                                        src={getUploadsURL(img.url)}
                                         alt={`${product.name} - ${index}`}
                                         fill
                                         style={{ objectFit: 'cover' }}

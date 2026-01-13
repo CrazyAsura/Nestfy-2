@@ -4,6 +4,7 @@ import { Avatar, Box, Typography, Button } from '@mui/material'
 import { motion } from 'framer-motion'
 import { Edit } from '@mui/icons-material'
 import Link from 'next/link'
+import { getUploadsURL } from '@/app/libs/api/services/axios'
 
 type Props = {
   name: string
@@ -12,7 +13,7 @@ type Props = {
 }
 
 export default function ProfileHeader({name, email, image}: Props) {
-    const imageUrl = image ? (image.startsWith('http') ? image : `/uploads/${image}`) : undefined;
+    const imageUrl = image ? getUploadsURL(image) : undefined;
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3, position: 'relative' }}>

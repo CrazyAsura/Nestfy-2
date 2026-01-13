@@ -13,6 +13,7 @@ import { calculateDiscountPercent } from '@/app/libs/utils/function/calculateDis
 import { useDispatch } from 'react-redux';
 import { selectProduct } from '@/app/libs/stores/slices/products.slice';
 import { motion, Variants } from 'framer-motion';
+import { getUploadsURL } from '@/app/libs/api/services/axios';
 import { 
     Box, 
     Typography, 
@@ -239,7 +240,7 @@ export default function CarousselProducts() {
                             overflow: 'hidden'
                         }}>
                             <MotionImage
-                                src={product.imageUrl || product.images?.[0]?.url || '/next.svg'}
+                                src={getUploadsURL(product.imageUrl || product.images?.[0]?.url || '/next.svg')}
                                 alt={product.name}
                                 fill
                                 style={{ objectFit: 'cover' }}

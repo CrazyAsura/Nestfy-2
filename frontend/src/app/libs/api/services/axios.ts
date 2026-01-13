@@ -26,6 +26,14 @@ export const getBaseURL = () => {
     return urlWithSlash.includes('/api/') ? urlWithSlash : `${urlWithSlash}api/`;
 };
 
+export const getUploadsURL = (path?: string) => {
+    const socketUrl = getSocketBaseURL();
+    const baseUrl = socketUrl.endsWith('/') ? socketUrl : `${socketUrl}/`;
+    if (!path) return `${baseUrl}uploads/`;
+    if (path.startsWith('http')) return path;
+    return `${baseUrl}uploads/${path.startsWith('/') ? path.slice(1) : path}`;
+};
+
 export const api = axios.create({
     baseURL: getBaseURL(),
     withCredentials: true,
