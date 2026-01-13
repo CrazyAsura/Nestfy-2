@@ -7,6 +7,7 @@ import { Product, ProductDocument } from '../product/schemas/product.schema';
 import { Order, OrderDocument } from '../order/schemas/order.schema';
 import { Category, CategoryDocument } from '../category/schemas/category.schema';
 import { Review, ReviewDocument } from '../review/schemas/review.schema';
+import { NotificationService } from '../notification/notification.service';
 import { LogService } from '../log/log.service';
 
 @Injectable()
@@ -22,6 +23,7 @@ export class AdminService {
     private readonly categoryModel: Model<CategoryDocument>,
     @InjectModel(Review.name)
     private readonly reviewModel: Model<ReviewDocument>,
+    private readonly notificationService: NotificationService,
     private readonly logService: LogService,
   ) {}
 
@@ -283,5 +285,37 @@ export class AdminService {
         totalPages: Math.ceil(total / limit),
       },
     };
+  }
+
+  async updateOrderDelivery(orderId: string, data: { status?: OrderStatus, trackingCode?: string, currentLocation?: string, description?: string }) {
+    const order = await this.orderModel.findById(orderId).exec();
+    if (!order) throw new NotFoundException('Pedido não encontrado');
+
+    const updateData: any = {};
+    if (data.status) updateData.status = data.status;
+    if (data.trackingCode) updateData.trackingCode = data.trackingCode;
+    if (data.currentLocation) updateData.currentLocation = data.currentLocation;
+
+    // Adicionar ao histórico
+    const historyEntry = {
+      status: data.status || order.status,
+      location: data.currentLocation || order.currentLocation || 'Em processamento',
+      description: data.description || `Status atualizado para ${data.status || order.status}`,
+      timestamp: new Date(),
+    };
+
+    updateData.$push = { trackingHistory: historyEntry };
+
+    const updatedOrder = await this.orderModel.findByIdAndUpdate(orderId, updateData, { new: true }).exec();
+
+    // Notificar o usuário
+    await this.notificationService.create(
+      order.userId,
+      'Atualização de Entrega',
+      `O status do seu pedido #${order.orderNumber} foi atualizado para: ${data.status || order.status}.`,
+      'INFO'
+    );
+
+    return updatedOrder;
   }
 }

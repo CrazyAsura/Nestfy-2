@@ -57,6 +57,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import BlockIcon from '@mui/icons-material/Block';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
@@ -77,7 +78,8 @@ import {
   useCreateCategory,
   useUpdateCategory,
   useBanUser,
-  useUnbanUser
+  useUnbanUser,
+  useUpdateOrderDelivery
 } from '@/app/libs/hooks/useAdmin';
 import { Role } from '@/app/libs/types/enums';
 
@@ -160,6 +162,17 @@ export default function AdminPage() {
     role: Role.USER
   });
 
+  const [isDeliveryDialogOpen, setIsDeliveryDialogOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [deliveryFormData, setDeliveryFormData] = useState({
+    status: '',
+    trackingCode: '',
+    currentLocation: '',
+    description: ''
+  });
+
+  const updateOrderDeliveryMutation = useUpdateOrderDelivery();
+
   // Search and Filter States
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -198,15 +211,37 @@ export default function AdminPage() {
       ...prev,
       [userId]: !prev[userId]
     }));
-  };
-
   const handleSectionChange = (section: Section) => {
     setActiveSection(section);
+    setPage(0);
     setSearchTerm('');
     setStatusFilter('ALL');
-    setCategoryFilter('ALL');
-    setRoleFilter('ALL');
-    setPage(0);
+  };
+
+  const handleOpenDeliveryDialog = (order: any) => {
+    setSelectedOrder(order);
+    setDeliveryFormData({
+      status: order.status || '',
+      trackingCode: order.trackingCode || '',
+      currentLocation: order.currentLocation || '',
+      description: ''
+    });
+    setIsDeliveryDialogOpen(true);
+  };
+
+  const handleUpdateDelivery = async () => {
+    if (!selectedOrder) return;
+
+    try {
+      await updateOrderDeliveryMutation.mutateAsync({
+        orderId: selectedOrder.id,
+        data: deliveryFormData
+      });
+      showFeedback('Entrega atualizada com sucesso!');
+      setIsDeliveryDialogOpen(false);
+    } catch (error) {
+      showFeedback('Erro ao atualizar entrega', 'error');
+    }
   };
 
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -1070,15 +1105,82 @@ export default function AdminPage() {
                       </TableCell>
                       <TableCell>{formatDate(order.createdAt)}</TableCell>
                       <TableCell align="right">
-                        <IconButton size="small" color="primary">
-                          <AssessmentIcon fontSize="small" />
-                        </IconButton>
+                        <Stack direction="row" spacing={1} justifyContent="flex-end">
+                          <Tooltip title="Gerenciar Entrega">
+                            <IconButton size="small" color="primary" onClick={() => handleOpenDeliveryDialog(order)}>
+                              <LocalShippingIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Ver Detalhes">
+                            <IconButton size="small" color="info">
+                              <AssessmentIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Stack>
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </TableContainer>
+
+            {/* Delivery Dialog */}
+            <Dialog open={isDeliveryDialogOpen} onClose={() => setIsDeliveryDialogOpen(false)} maxWidth="sm" fullWidth>
+              <DialogTitle>Gerenciar Entrega - Pedido #{selectedOrder?.id?.substring(0, 8)}</DialogTitle>
+              <DialogContent dividers>
+                <Stack spacing={3} sx={{ mt: 1 }}>
+                  <FormControl fullWidth>
+                    <InputLabel>Status do Pedido</InputLabel>
+                    <Select
+                      value={deliveryFormData.status}
+                      label="Status do Pedido"
+                      onChange={(e) => setDeliveryFormData({ ...deliveryFormData, status: e.target.value })}
+                    >
+                      <MenuItem value="PENDING">Pendente</MenuItem>
+                      <MenuItem value="PROCESSING">Processando</MenuItem>
+                      <MenuItem value="SHIPPED">Enviado</MenuItem>
+                      <MenuItem value="DELIVERED">Entregue</MenuItem>
+                      <MenuItem value="CANCELLED">Cancelado</MenuItem>
+                    </Select>
+                  </FormControl>
+
+                  <TextField
+                    fullWidth
+                    label="Código de Rastreio"
+                    value={deliveryFormData.trackingCode}
+                    onChange={(e) => setDeliveryFormData({ ...deliveryFormData, trackingCode: e.target.value })}
+                  />
+
+                  <TextField
+                    fullWidth
+                    label="Localização Atual"
+                    value={deliveryFormData.currentLocation}
+                    onChange={(e) => setDeliveryFormData({ ...deliveryFormData, currentLocation: e.target.value })}
+                  />
+
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={2}
+                    label="Descrição da Atualização"
+                    placeholder="Ex: O pedido saiu para entrega ao destinatário"
+                    value={deliveryFormData.description}
+                    onChange={(e) => setDeliveryFormData({ ...deliveryFormData, description: e.target.value })}
+                  />
+                </Stack>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => setIsDeliveryDialogOpen(false)}>Cancelar</Button>
+                <Button 
+                  variant="contained" 
+                  onClick={handleUpdateDelivery}
+                  disabled={updateOrderDeliveryMutation.isPending}
+                  startIcon={updateOrderDeliveryMutation.isPending ? <CircularProgress size={20} color="inherit" /> : null}
+                >
+                  {updateOrderDeliveryMutation.isPending ? 'Atualizando...' : 'Atualizar Entrega'}
+                </Button>
+              </DialogActions>
+            </Dialog>
           </Box>
         );
  
@@ -1227,4 +1329,5 @@ export default function AdminPage() {
       </Snackbar>
     </Container>
   );
+ }
 }

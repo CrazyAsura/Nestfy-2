@@ -210,3 +210,14 @@ export function useDeleteCategory() {
         },
     });
 }
+
+export function useUpdateOrderDelivery() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ orderId, data }: { orderId: string, data: any }) => 
+            adminService.updateOrderDelivery(orderId, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin', 'orders'] });
+        },
+    });
+}

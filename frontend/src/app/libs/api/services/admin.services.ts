@@ -24,6 +24,11 @@ export async function getAllUsers() {
     return response.data;
 }
 
+export async function updateOrderDelivery(orderId: string, data: any) {
+    const response = await api.patch(`${API_ROUTES.ADMIN.ORDERS}/${orderId}/delivery`, data);
+    return response.data;
+}
+
 export async function getUserDetails(userId: string) {
     const response = await api.get(API_ROUTES.ADMIN.USER_DETAILS(userId));
     return response.data;

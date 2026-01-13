@@ -9,6 +9,7 @@ import { Order, OrderSchema } from '../order/schemas/order.schema';
 import { Category, CategorySchema } from '../category/schemas/category.schema';
 import { Review, ReviewSchema } from '../review/schemas/review.schema';
 import { LogModule } from '../log/log.module';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { LogModule } from '../log/log.module';
       { name: Review.name, schema: ReviewSchema },
     ]),
     LogModule,
+    NotificationModule,
   ],
   controllers: [AdminController],
   providers: [AdminService, SeedService],

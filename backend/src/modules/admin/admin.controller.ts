@@ -73,6 +73,12 @@ export class AdminController {
     return this.adminService.getUserHistoric(id); 
   }
 
+  // Delivery Management
+  @Patch('orders/:id/delivery')
+  updateOrderDelivery(@Param('id') id: string, @Body() data: any) {
+    return this.adminService.updateOrderDelivery(id, data);
+  }
+
   // Products Management
   @Get('products')
   getProducts() { 

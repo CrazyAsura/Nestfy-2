@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, HydratedDocument } from 'mongoose';
 import { OrderStatus, PaymentStatus } from '../../../constants/enums';
 
-export type OrderDocument = Order & Document;
+export type OrderDocument = HydratedDocument<Order>;
 
 @Schema({ timestamps: true, collection: 'orders' })
 export class Order {
@@ -48,6 +48,20 @@ export class Order {
 
   @Prop({ type: Date, required: false })
   invoiceDate: Date;
+
+  @Prop({ type: String, required: false })
+  trackingCode: string;
+
+  @Prop({ type: String, required: false })
+  currentLocation: string;
+
+  @Prop({ type: [Object], default: [] })
+  trackingHistory: Array<{
+    status: string;
+    location: string;
+    description: string;
+    timestamp: Date;
+  }>;
 
   createdAt: Date;
   updatedAt: Date;
