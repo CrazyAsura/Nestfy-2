@@ -13,28 +13,11 @@ import { ChatbotService } from './chatbot.service';
 
 @WebSocketGateway({
   cors: {
-    origin: (origin, callback) => {
-      const allowedOrigins = [
-        process.env.FRONTEND_URL,
-        'http://localhost:3000',
-        'http://localhost:3001',
-        'https://nestfy-1.vercel.app',
-      ].filter(Boolean);
-      
-      if (
-        !origin ||
-        allowedOrigins.includes(origin) ||
-        origin.endsWith('.vercel.app') ||
-        origin.includes('railway.app') ||
-        origin.includes('onrender.com') ||
-        process.env.NODE_ENV === 'development'
-      ) {
-        callback(null, true);
-      } else {
-        console.log('WS CORS blocked origin:', origin);
-        callback(null, false);
-      }
-    },
+    origin: [
+      'https://nestfy-1.vercel.app',
+      'http://localhost:3000',
+      'http://localhost:3001',
+    ],
     credentials: true,
     methods: ['GET', 'POST'],
   },

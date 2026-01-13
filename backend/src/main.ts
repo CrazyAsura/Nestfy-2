@@ -54,27 +54,34 @@ async function bootstrap() {
   const allowedOriginsEnv = process.env.ALLOWED_ORIGINS || '';
   
   const allowedOrigins = [
-    frontendUrl, 
+    'https://nestfy-1.vercel.app',
     'http://localhost:3000',
     'http://localhost:3001',
-    'https://nestfy-1.vercel.app',
+    process.env.FRONTEND_URL,
     ...allowedOriginsEnv.split(',').map(o => o.trim()).filter(o => o !== '')
-  ];
+  ].filter(Boolean);
 
   app.enableCors({
     origin: (origin, callback) => {
-      if (
-        !origin || 
-        allowedOrigins.includes(origin) || 
-        origin.endsWith('.vercel.app') ||
-        origin.includes('railway.app') ||
-        origin.includes('onrender.com') ||
-        process.env.NODE_ENV === 'development'
-      ) {
+      // Se não houver origin (ex: mobile apps ou ferramentas de teste), permite
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      const isAllowed = allowedOrigins.some(allowed => {
+        if (allowed === origin) return true;
+        // Suporte para subdomínios do vercel e outros padrões
+        if (allowed.includes('.vercel.app') && origin.endsWith('.vercel.app')) return true;
+        if (allowed.includes('onrender.com') && origin.includes('onrender.com')) return true;
+        return false;
+      });
+
+      if (isAllowed || process.env.NODE_ENV === 'development') {
         callback(null, true);
       } else {
         console.log('CORS blocked origin:', origin);
-        callback(null, false); // Don't throw error, just don't allow
+        // Em vez de null, retornamos false explicitamente
+        callback(null, false);
       }
     },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
