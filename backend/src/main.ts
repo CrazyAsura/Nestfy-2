@@ -69,6 +69,7 @@ async function bootstrap() {
       }
 
       const isAllowed = allowedOrigins.some(allowed => {
+        if (!allowed) return false;
         if (allowed === origin) return true;
         // Suporte para subdomínios do vercel e outros padrões
         if (allowed.includes('.vercel.app') && origin.endsWith('.vercel.app')) return true;
