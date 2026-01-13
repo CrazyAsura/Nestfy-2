@@ -90,7 +90,7 @@ async function bootstrap() {
     }),
   );
 
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix('api', { exclude: ['/'] });
 
   const config = new DocumentBuilder()
   .setTitle('Ecommerce API')
