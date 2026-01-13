@@ -121,7 +121,10 @@ export class ChatbotService implements OnModuleInit {
         return content;
       }
     } catch (error) {
-      this.logger.warn(`LLM indisponível: ${error.message}. Usando fallback.`);
+      this.logger.error(`Erro ao processar mensagem com LLM: ${error.message}`);
+      if (error.message.includes('ECONNREFUSED') || error.message.includes('fetch failed')) {
+        this.logger.warn('DICA: O backend no Render não consegue acessar o Ollama no seu localhost. Use um túnel (Ngrok) ou mude o AI_PROVIDER para um serviço na nuvem.');
+      }
       return this.getSmartFallbackResponse(message);
     }
 
@@ -131,15 +134,25 @@ export class ChatbotService implements OnModuleInit {
   private getSmartFallbackResponse(message: string): string {
     const msg = message.toLowerCase();
     
+    // Respostas para saudações e perguntas genéricas
+    if (msg.includes('horas') || msg.includes('horário') || msg.includes('que horas')) {
+      const now = new Date();
+      return `Agora são exatamente ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}. Como posso ajudar você com suas compras?`;
+    }
+
+    if (msg.includes('dia') || msg.includes('tarde') || msg.includes('noite')) {
+      return "Olá! Espero que seu dia esteja sendo excelente. Como a Nestfy pode te ajudar hoje?";
+    }
+
     // Base de conhecimento expandida para simular uma IA real
     const knowledgeBase = [
-      { keys: ['olá', 'oi', 'bom dia', 'boa tarde', 'boa noite'], response: "Olá! Seja bem-vindo à Nestfy. Como posso ajudar você hoje?" },
-      { keys: ['entrega', 'prazo', 'chega', 'frete'], response: "Entregamos em todo o Brasil! O prazo médio é de 3 a 7 dias úteis. Frete grátis em compras acima de R$ 200." },
-      { keys: ['pagamento', 'cartão', 'pix', 'boleto', 'parcela'], response: "Aceitamos PIX (5% de desconto), cartões de crédito em até 12x e boleto. No cartão, aceitamos todas as bandeiras." },
-      { keys: ['troca', 'devolução', 'garantia', 'devolver'], response: "Você tem até 7 dias após o recebimento para solicitar a troca ou devolução gratuita, conforme o Código de Defesa do Consumidor." },
-      { keys: ['contato', 'humano', 'telefone', 'whatsapp', 'ajuda'], response: "Você pode falar com nossa equipe pelo WhatsApp (11) 99999-9999 ou pelo e-mail suporte@nestfy.com.br." },
-      { keys: ['produto', 'estoque', 'tem', 'vende'], response: "Temos uma grande variedade de eletrônicos, moda e acessórios. Você pode usar a barra de busca no topo do site para encontrar algo específico!" },
-      { keys: ['promoção', 'desconto', 'cupom', 'oferta'], response: "Use o cupom BEMVINDO10 para ganhar 10% de desconto na sua primeira compra!" }
+      { keys: ['olá', 'oi', 'hello', 'saudações'], response: "Olá! Seja bem-vindo à Nestfy, seu e-commerce de luxo. Como posso tornar sua experiência única hoje?" },
+      { keys: ['entrega', 'prazo', 'chega', 'frete', 'correio', 'rastreio'], response: "A Nestfy entrega em todo o território nacional. O prazo médio para capitais é de 3 a 5 dias úteis. Você pode rastrear seu pedido na seção 'Meus Pedidos'." },
+      { keys: ['pagamento', 'cartão', 'pix', 'boleto', 'parcela', 'preço', 'valor'], response: "Oferecemos diversas formas de pagamento: PIX com 5% de desconto, cartões de crédito (até 12x sem juros) e boleto bancário." },
+      { keys: ['troca', 'devolução', 'garantia', 'devolver', 'errado', 'defeito'], response: "Nossa política de trocas é simples: você tem 7 dias após o recebimento para solicitar a devolução total ou troca de qualquer item sem custo adicional." },
+      { keys: ['contato', 'humano', 'telefone', 'whatsapp', 'ajuda', 'suporte', 'atendimento'], response: "Você pode falar com nossos consultores de luxo pelo WhatsApp (11) 99999-9999 ou e-mail suporte@nestfy.com.br. Atendemos das 09h às 18h." },
+      { keys: ['produto', 'estoque', 'tem', 'vende', 'coleção', 'novidade'], response: "Nossas coleções são atualizadas semanalmente com o que há de mais moderno em tecnologia e moda. Explore nosso catálogo na página inicial!" },
+      { keys: ['promoção', 'desconto', 'cupom', 'oferta', 'barato'], response: "Atualmente temos o cupom NESTFYLUXO para 15% de desconto em itens selecionados da nova coleção!" }
     ];
 
     for (const item of knowledgeBase) {
@@ -148,7 +161,8 @@ export class ChatbotService implements OnModuleInit {
       }
     }
 
-    return "Entendi sua dúvida. No momento meu módulo de IA avançada está offline, mas sou treinado para responder sobre entregas, pagamentos, trocas e produtos. Como posso te ajudar com esses temas?";
+    // Se a IA estiver offline (Ollama não acessível no Render), tentamos dar uma resposta educada e útil
+    return "Interessante sua pergunta! No momento estou operando em modo de assistência básica. Posso te ajudar com informações sobre nossos produtos de luxo, prazos de entrega, pagamentos ou trocas. O que você prefere saber?";
   }
 
   async create(createChatbotDto: any) {
