@@ -13,3 +13,7 @@ services:
         value: https://nestfy-1.vercel.app
       - key: NODE_OPTIONS
         value: --max-old-space-size=450
+      - key: OLLAMA_BASE_URL
+        value: http://localhost:11434
+      - key: AI_PROVIDER
+        value: ollama

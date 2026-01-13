@@ -37,7 +37,11 @@ export class ChatbotService implements OnModuleInit {
       const provider = this.configService.get<string>('AI_PROVIDER') || 'ollama';
       
       if (provider === 'ollama') {
-        const baseUrl = this.configService.get<string>('OLLAMA_BASE_URL') || "http://localhost:11434";
+        let baseUrl = this.configService.get<string>('OLLAMA_BASE_URL') || "http://localhost:11434";
+        // Remove trailing slash if exists to avoid double slashes in langchain
+        if (baseUrl.endsWith('/')) {
+          baseUrl = baseUrl.slice(0, -1);
+        }
         const model = this.configService.get<string>('OLLAMA_MODEL') || "llama3";
         
         this.llm = new ChatOllama({
@@ -45,7 +49,7 @@ export class ChatbotService implements OnModuleInit {
           model,
           temperature: 0.7,
         });
-        this.logger.log(`Ollama inicializado em ${baseUrl} com modelo ${model}`);
+        this.logger.log(`Ollama configurado em ${baseUrl} com modelo ${model}`);
       } else if (provider === 'localai') {
         const baseUrl = this.configService.get<string>('LOCALAI_BASE_URL') || "http://localhost:8080/v1";
         const model = this.configService.get<string>('LOCALAI_MODEL') || "mistral";
