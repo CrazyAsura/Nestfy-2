@@ -37,6 +37,12 @@ export class Order {
   @Prop({ type: String, required: true })
   shippingAddress: string;
 
+  @Prop({ type: String, required: false })
+  customerPhone: string;
+
+  @Prop({ type: String, required: false, index: true })
+  stripeSessionId: string;
+
   @Prop({ type: String, required: true, index: true })
   userId: string;
 

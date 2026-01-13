@@ -6,13 +6,55 @@ import {
     Box, 
     Button, 
     Paper, 
-    Stack 
+    Stack,
+    CircularProgress 
 } from '@mui/material';
-import { CheckCircle } from '@mui/icons-material';
+import { CheckCircle, ErrorOutline } from '@mui/icons-material';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { api } from '@/app/libs/api/services/axios';
 
 export default function PaymentSuccessPage() {
+    const searchParams = useSearchParams();
+    const sessionId = searchParams.get('session_id');
+    const [loading, setLoading] = useState(!!sessionId);
+    const [status, setStatus] = useState<any>(null);
+
+    useEffect(() => {
+        if (sessionId) {
+            const checkStatus = async () => {
+                try {
+                    const { data } = await api.post('/payment/session-status', { sessionId });
+                    setStatus(data);
+                    if (data.status === 'paid') {
+                        setLoading(false);
+                    } else {
+                        // Tentar novamente em 2 segundos se ainda não estiver pago
+                        setTimeout(checkStatus, 2000);
+                    }
+                } catch (error) {
+                    console.error('Erro ao verificar status:', error);
+                    setLoading(false);
+                }
+            };
+            checkStatus();
+        }
+    }, [sessionId]);
+
+    if (loading) {
+        return (
+            <Container maxWidth="sm" sx={{ py: 12, textAlign: 'center' }}>
+                <CircularProgress size={60} sx={{ mb: 4 }} />
+                <Typography variant="h5">Confirmando seu pagamento...</Typography>
+                <Typography variant="body2" color="text.secondary" mt={2}>
+                    Isso levará apenas alguns segundos.
+                </Typography>
+            </Container>
+        );
+    }
+
     return (
         <Container maxWidth="sm" sx={{ py: 12 }}>
             <motion.div
@@ -37,18 +79,24 @@ export default function PaymentSuccessPage() {
                             display: 'flex', 
                             justifyContent: 'center', 
                             mb: 4,
-                            color: 'success.main'
+                            color: status?.status === 'paid' || !sessionId ? 'success.main' : 'warning.main'
                         }}
                     >
-                        <CheckCircle sx={{ fontSize: 100 }} />
+                        {status?.status === 'paid' || !sessionId ? (
+                            <CheckCircle sx={{ fontSize: 100 }} />
+                        ) : (
+                            <ErrorOutline sx={{ fontSize: 100 }} />
+                        )}
                     </Box>
 
                     <Typography variant="h3" fontWeight={900} mb={2} color="text.primary">
-                        PAGAMENTO APROVADO!
+                        {status?.status === 'paid' || !sessionId ? 'PAGAMENTO APROVADO!' : 'PROCESSANDO PAGAMENTO'}
                     </Typography>
 
                     <Typography variant="body1" color="text.secondary" mb={6} sx={{ fontSize: '1.1rem' }}>
-                        Obrigado por sua compra! Seu pedido foi processado com sucesso e em breve você receberá um e-mail com os detalhes do envio.
+                        {status?.status === 'paid' || !sessionId 
+                            ? `Obrigado por sua compra! Seu pedido ${status?.orderNumber ? '#' + status.orderNumber : ''} foi processado com sucesso e em breve você receberá um e-mail com os detalhes do envio.`
+                            : 'Estamos aguardando a confirmação do seu pagamento. Você pode acompanhar o status na sua conta.'}
                     </Typography>
 
                     <Stack spacing={2}>

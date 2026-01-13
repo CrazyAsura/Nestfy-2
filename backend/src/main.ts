@@ -15,7 +15,7 @@ dotenv.config();
 dotenv.config({ path: join(process.cwd(), 'backend', '.env') });
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { rawBody: true });
   const logger = new Logger('Bootstrap');
 
   // Executar Seed automático

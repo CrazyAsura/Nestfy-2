@@ -34,6 +34,7 @@ import { LogModule } from './modules/log/log.module';
 import { FinanceModule } from './modules/finance/finance.module';
 import { CjDropshippingModule } from './modules/cj-dropshipping/cj-dropshipping.module';
 import { UserActivityInterceptor } from './common/middleware/interceptors/userActivityInterceptor';
+import { ShippingModule } from './modules/shipping/shipping.module';
 
 
 @Module({
@@ -117,6 +118,7 @@ import { UserActivityInterceptor } from './common/middleware/interceptors/userAc
     LogModule,
     FinanceModule,
     CjDropshippingModule,
+    ShippingModule,
   ],
   controllers: [AppController],
   providers: [

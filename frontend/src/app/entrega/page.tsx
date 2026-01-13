@@ -30,27 +30,39 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useOrder, useOrders } from '@/app/libs/hooks/useOrders';
+import { useTracking } from '@/app/libs/hooks/useShipping';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/app/libs/stores';
+import { Tabs, Tab } from '@mui/material';
 
 export default function EntregaPage() {
     const user = useSelector((state: RootState) => state.auth.user);
+    const [searchType, setSearchType] = useState(0); // 0 for Order ID, 1 for Correios Code
     const [orderNumber, setOrderNumber] = useState('');
     const [searchId, setSearchId] = useState('');
-    const { data: order, isLoading, isError } = useOrder(searchId);
+    const [trackingCode, setTrackingCode] = useState('');
+    const [searchTrackCode, setSearchTrackCode] = useState('');
+
+    const { data: order, isLoading: isLoadingOrder, isError: isErrorOrder } = useOrder(searchType === 0 ? searchId : '');
+    const { data: trackingData, isLoading: isLoadingTracking, isError: isErrorTracking } = useTracking(searchType === 1 ? searchTrackCode : '');
     const { data: myOrders = [], isLoading: isLoadingOrders } = useOrders();
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        if (orderNumber) {
+        if (searchType === 0 && orderNumber) {
             setSearchId(orderNumber);
+            setSearchTrackCode('');
+        } else if (searchType === 1 && trackingCode) {
+            setSearchTrackCode(trackingCode);
+            setSearchId('');
         }
     };
 
     const handleSelectOrder = (id: string) => {
+        setSearchType(0);
         setSearchId(id);
         setOrderNumber(id);
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -58,13 +70,18 @@ export default function EntregaPage() {
 
     const getStepIcon = (status: string) => {
         switch (status) {
-            case 'DELIVERED': return <CheckCircle />;
-            case 'SHIPPED': return <LocalShipping />;
+            case 'DELIVERED': 
+            case 'Objeto entregue ao destinatário':
+                return <CheckCircle />;
+            case 'SHIPPED': 
+            case 'Objeto em trânsito - por favor aguarde':
+                return <LocalShipping />;
             default: return <Pending />;
         }
     };
 
-    const steps = order?.trackingHistory || [];
+    const steps = searchType === 0 ? (order?.trackingHistory || []) : (trackingData?.events || []);
+    const isLoading = searchType === 0 ? isLoadingOrder : isLoadingTracking;
 
     return (
         <Box sx={{ 
@@ -97,27 +114,64 @@ export default function EntregaPage() {
                             Acompanhe sua jornada NESTFY em tempo real
                         </Typography>
 
+                        <Tabs 
+                            value={searchType} 
+                            onChange={(_, newValue) => setSearchType(newValue)}
+                            centered
+                            sx={{
+                                mb: 4,
+                                '& .MuiTabs-indicator': { backgroundColor: '#AF944F' },
+                                '& .MuiTab-root': { color: 'rgba(255,255,255,0.5)', '&.Mui-selected': { color: '#AF944F' } }
+                            }}
+                        >
+                            <Tab label="ID do Pedido" />
+                            <Tab label="Código de Rastreio (Correios)" />
+                        </Tabs>
+
                         <Box component="form" onSubmit={handleSearch} sx={{ maxWidth: 600, mx: 'auto', display: 'flex', gap: 2 }}>
-                            <TextField
-                                fullWidth
-                                variant="outlined"
-                                placeholder="Insira o ID do seu pedido (Ex: 65a...)"
-                                value={orderNumber}
-                                onChange={(e) => setOrderNumber(e.target.value)}
-                                sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        color: 'white',
-                                        backgroundColor: 'rgba(255,255,255,0.05)',
-                                        borderRadius: '12px',
-                                        backdropFilter: 'blur(10px)',
-                                        border: '1px solid rgba(175, 148, 79, 0.3)',
-                                        '& fieldset': { border: 'none' },
-                                        '&.Mui-focused': {
-                                            border: '1px solid #AF944F',
+                            {searchType === 0 ? (
+                                <TextField
+                                    fullWidth
+                                    variant="outlined"
+                                    placeholder="Insira o ID do seu pedido (Ex: 65a...)"
+                                    value={orderNumber}
+                                    onChange={(e) => setOrderNumber(e.target.value)}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            color: 'white',
+                                            backgroundColor: 'rgba(255,255,255,0.05)',
+                                            borderRadius: '12px',
+                                            backdropFilter: 'blur(10px)',
+                                            border: '1px solid rgba(175, 148, 79, 0.3)',
+                                            '& fieldset': { border: 'none' },
+                                            '&.Mui-focused': {
+                                                border: '1px solid #AF944F',
+                                            }
                                         }
-                                    }
-                                }}
-                            />
+                                    }}
+                                />
+                            ) : (
+                                <TextField
+                                    fullWidth
+                                    variant="outlined"
+                                    placeholder="Insira o código dos Correios (Ex: AA123456789BR)"
+                                    value={trackingCode}
+                                    onChange={(e) => setTrackingCode(e.target.value)}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            color: 'white',
+                                            backgroundColor: 'rgba(255,255,255,0.05)',
+                                            borderRadius: '12px',
+                                            backdropFilter: 'blur(10px)',
+                                            border: '1px solid rgba(175, 148, 79, 0.3)',
+                                            '& fieldset': { border: 'none' },
+                                            '&.Mui-focused': {
+                                                border: '1px solid #AF944F',
+                                            }
+                                        }
+                                    }}
+                                />
+                            )}
                             <Button 
                                 type="submit"
                                 variant="contained"
@@ -138,7 +192,7 @@ export default function EntregaPage() {
                             <Box key="loading" textAlign="center" py={10}>
                                 <CircularProgress sx={{ color: '#AF944F' }} />
                             </Box>
-                        ) : order ? (
+                        ) : (order || (trackingData && trackingData.status !== 'NOT_FOUND')) ? (
                             <Box key="result">
                                 <Paper sx={{ 
                                     p: 4, 
@@ -149,13 +203,15 @@ export default function EntregaPage() {
                                 }}>
                                     <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" spacing={2} mb={4}>
                                         <Box>
-                                            <Typography sx={{ color: 'rgba(255,255,255,0.5)', mb: 0.5 }}>Pedido:</Typography>
-                                            <Typography variant="h6" sx={{ color: 'white', fontWeight: 600 }}>#{order.orderNumber}</Typography>
+                                            <Typography sx={{ color: 'rgba(255,255,255,0.5)', mb: 0.5 }}>{searchType === 0 ? 'Pedido:' : 'Código:'}</Typography>
+                                            <Typography variant="h6" sx={{ color: 'white', fontWeight: 600 }}>
+                                                {searchType === 0 ? `#${order?.orderNumber}` : trackingData?.trackingCode}
+                                            </Typography>
                                         </Box>
                                         <Box>
                                             <Typography sx={{ color: 'rgba(255,255,255,0.5)', mb: 0.5 }}>Status Atual:</Typography>
                                             <Chip 
-                                                label={order.status} 
+                                                label={searchType === 0 ? order?.status : trackingData?.lastStatus} 
                                                 sx={{ 
                                                     backgroundColor: 'rgba(175, 148, 79, 0.2)', 
                                                     color: '#AF944F',
@@ -165,8 +221,10 @@ export default function EntregaPage() {
                                             />
                                         </Box>
                                         <Box>
-                                            <Typography sx={{ color: 'rgba(255,255,255,0.5)', mb: 0.5 }}>Cód. Rastreio:</Typography>
-                                            <Typography sx={{ color: 'white', fontWeight: 600 }}>{order.trackingCode || 'Aguardando'}</Typography>
+                                            <Typography sx={{ color: 'rgba(255,255,255,0.5)', mb: 0.5 }}>{searchType === 0 ? 'Cód. Rastreio:' : 'Última Atualização:'}</Typography>
+                                            <Typography sx={{ color: 'white', fontWeight: 600 }}>
+                                                {searchType === 0 ? (order?.trackingCode || 'Aguardando') : trackingData?.lastUpdate}
+                                            </Typography>
                                         </Box>
                                     </Stack>
 
@@ -197,15 +255,15 @@ export default function EntregaPage() {
                                                 <Step key={index} active={index === 0} completed={index > 0}>
                                                     <StepLabel icon={index === 0 ? <LocationOn /> : undefined}>
                                                         <Typography sx={{ fontWeight: 600, color: index === 0 ? '#AF944F' : 'white' }}>
-                                                            {step.status} - {step.location}
+                                                            {searchType === 0 ? `${step.status} - ${step.location}` : `${step.status} - ${step.unidade?.tipo || ''} ${step.unidade?.endereco?.cidade || ''}`}
                                                         </Typography>
-                                                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)' }}>
-                                                            {format(new Date(step.timestamp), "dd 'de' MMMM 'às' HH:mm", { locale: ptBR })}
+                                                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)' }}>
+                                                            {searchType === 0 ? format(new Date(step.date), "dd 'de' MMMM 'às' HH:mm", { locale: ptBR }) : `${step.data} às ${step.hora}`}
                                                         </Typography>
                                                     </StepLabel>
                                                     <StepContent>
-                                                        <Typography sx={{ color: 'rgba(255,255,255,0.6)', mt: 1 }}>
-                                                            {step.description}
+                                                        <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>
+                                                            {searchType === 0 ? step.details : (step.detalhes || '')}
                                                         </Typography>
                                                     </StepContent>
                                                 </Step>
@@ -220,10 +278,13 @@ export default function EntregaPage() {
                                     )}
                                 </Paper>
                             </Box>
-                        ) : searchId && (
+                        ) : (searchId || searchTrackCode) && (
                             <Box key="not-found" textAlign="center" py={10}>
                                 <Typography sx={{ color: 'rgba(255,255,255,0.5)' }}>
-                                    Pedido não encontrado. Verifique o ID e tente novamente.
+                                    {searchType === 0 
+                                        ? 'Pedido não encontrado. Verifique o ID e tente novamente.' 
+                                        : (trackingData?.message || 'Código de rastreio não encontrado ou ainda não postado.')
+                                    }
                                 </Typography>
                             </Box>
                         )}

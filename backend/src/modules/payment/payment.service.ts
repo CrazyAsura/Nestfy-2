@@ -89,6 +89,12 @@ export class PaymentService {
         payment_method_types: ['card'],
         line_items: lineItems,
         mode: 'payment',
+        shipping_address_collection: {
+          allowed_countries: ['BR'], // Permitir apenas Brasil, ou adicione outros
+        },
+        phone_number_collection: {
+          enabled: true,
+        },
         success_url: `${process.env.FRONTEND_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${process.env.FRONTEND_URL}/payment/cancel`,
         metadata: {
@@ -182,6 +188,15 @@ export class PaymentService {
       const totalAmount = (session.amount_total || 0) / 100;
       const totalTaxAmount = items.reduce((acc: number, item: any) => acc + (item.taxes?.totalTaxAmount * item.quantity || 0), 0);
 
+      // Extrair endereço de entrega do Stripe
+      const shippingDetails = (session as any).shipping_details;
+      const address = shippingDetails?.address;
+      const formattedAddress = address 
+        ? `${address.line1}, ${address.line2 || ''}, ${address.city}, ${address.state}, ${address.postal_code}, ${address.country}`
+        : 'Endereço não fornecido';
+
+      const customerPhone = (session as any).customer_details?.phone || '';
+
       // 1. Criar o pedido no banco de dados
       const newOrder = new this.orderModel({
         userId,
@@ -189,8 +204,11 @@ export class PaymentService {
         totalTaxAmount,
         status: OrderStatus.PROCESSING,
         paymentStatus: PaymentStatus.COMPLETED,
+        paymentMethod: 'CARD',
         orderNumber: `ORD-${Date.now()}`,
-        shippingAddress: 'Endereço registrado no checkout', // TODO: Pegar endereço real do Stripe ou do usuário
+        shippingAddress: formattedAddress,
+        customerPhone: customerPhone,
+        stripeSessionId: session.id,
       });
 
       const savedOrder = await newOrder.save();
@@ -248,21 +266,22 @@ export class PaymentService {
 
     // Atualizar estoque dos produtos
     const items = (order as any).items;
-    if (items && items.length > 0) {
-      for (const item of items) {
-        await this.productModel.findByIdAndUpdate(item.productId, {
-          $inc: { stock: -item.quantity }
-        });
-      }
-    }
-
-    await this.notificationService.create(
-      userId,
-      'Pagamento Confirmado!',
-      `O pagamento do seu pedido #${savedOrder.orderNumber || savedOrder._id} foi confirmado com sucesso.`,
-      'SUCCESS'
-    );
-
     return savedOrder;
+  }
+
+  async getSessionStatus(sessionId: string) {
+    try {
+      const session = await this.stripe.checkout.sessions.retrieve(sessionId);
+      const order = await this.orderModel.findOne({ stripeSessionId: sessionId });
+
+      return {
+        status: session.payment_status,
+        orderStatus: order ? order.status : 'PENDING',
+        orderNumber: order ? order.orderNumber : null,
+      };
+    } catch (error) {
+      this.logger.error(`Error retrieving Stripe session: ${error.message}`);
+      throw new Error('Erro ao buscar status da sessão de pagamento');
+    }
   }
 }

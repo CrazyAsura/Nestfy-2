@@ -33,4 +33,10 @@ export class PaymentController {
   ) {
     return this.paymentService.confirmPayment(orderId, user.id);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('session-status')
+  getSessionStatus(@Body('sessionId') sessionId: string) {
+    return this.paymentService.getSessionStatus(sessionId);
+  }
 }

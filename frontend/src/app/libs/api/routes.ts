@@ -67,4 +67,7 @@ export const API_ROUTES = {
         INVENTORY: (pid: string) => `cj-dropshipping/inventory/${pid}`,
         IMPORT: 'cj-dropshipping/import',
     },
+    SHIPPING: {
+        TRACK: (code: string) => `shipping/track/${code}`,
+    },
 } as const;

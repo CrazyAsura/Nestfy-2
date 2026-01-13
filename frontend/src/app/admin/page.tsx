@@ -125,6 +125,13 @@ export default function AdminPage() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+  // Search and Filter States
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [categoryFilter, setCategoryFilter] = useState('ALL');
+  const [vendorFilter, setVendorFilter] = useState('ALL');
+  const [roleFilter, setRoleFilter] = useState('ALL');
+
   // Stats and Logs
   const { data: stats, isLoading: statsLoading, error: statsError } = useAdminStats();
   const { data: activityLogs, isLoading: logsLoading, error: logsError } = useAdminActivityLogs(page + 1, rowsPerPage);
@@ -191,13 +198,6 @@ export default function AdminPage() {
 
   const updateOrderDeliveryMutation = useUpdateOrderDelivery();
   const clearSampleDataMutation = useClearSampleData();
-
-  // Search and Filter States
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL');
-  const [categoryFilter, setCategoryFilter] = useState('ALL');
-  const [vendorFilter, setVendorFilter] = useState('ALL');
-  const [roleFilter, setRoleFilter] = useState('ALL');
 
   // Error and Feedback State
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'info' | 'warning' }>({
