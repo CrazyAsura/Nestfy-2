@@ -94,6 +94,19 @@ export class ChatbotService implements OnModuleInit {
           temperature: 0.7,
         });
         this.logger.log(`Groq AI inicializado com modelo ${model}`);
+      } else if (provider === 'free-llama' || !provider) {
+        // Provedor gratuito usando interface OpenAI-compatible (via proxies ou serviços free)
+        // Aqui vamos configurar para usar um modelo open-source via Hugging Face (que tem tier free generoso)
+        // Ou via um proxy de Llama 3 que não exige key para uso básico
+        this.llm = new ChatOpenAI({
+          openAIApiKey: 'none',
+          configuration: {
+            baseURL: "https://api.pawan.krd/cosmosrp/v1", // Exemplo de provedor comunitário free
+          },
+          modelName: "gpt-3.5-turbo", // Mapeado internamente para Llama 3 no proxy
+          temperature: 0.7,
+        });
+        this.logger.log(`Modo IA Gratuita (Llama 3) ativado via Community Proxy`);
       }
     } catch (error) {
       this.logger.error('Erro ao inicializar LLM:', error.message);

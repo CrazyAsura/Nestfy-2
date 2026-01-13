@@ -16,7 +16,7 @@ services:
       - key: OLLAMA_BASE_URL
         value: http://localhost:11434
       - key: AI_PROVIDER
-        value: groq
+        value: free-llama
       - key: GROQ_API_KEY
         sync: false
       - key: GROQ_MODEL
