@@ -6,7 +6,7 @@ export const getSocketBaseURL = () => {
     
     if (!apiUrl && typeof window !== 'undefined' && !window.location.hostname.includes('localhost')) {
         // Como o backend agora está fixo no Render, apontamos para lá
-        apiUrl = 'https://nestfy-backend.onrender.com';
+        apiUrl = 'https://nestfy-2-backend.onrender.com';
     }
 
     if (apiUrl) {
