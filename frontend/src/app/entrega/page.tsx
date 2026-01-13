@@ -15,7 +15,8 @@ import {
     Divider,
     IconButton,
     TextField,
-    Button
+    Button,
+    Grid
 } from '@mui/material';
 import { 
     LocalShipping, 
@@ -27,22 +28,32 @@ import {
     ArrowBack
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
-import { useOrder } from '@/app/libs/hooks/useOrders';
+import { useState, useEffect } from 'react';
+import { useOrder, useOrders } from '@/app/libs/hooks/useOrders';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import Link from 'next/link';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/app/libs/stores';
 
 export default function EntregaPage() {
+    const user = useSelector((state: RootState) => state.auth.user);
     const [orderNumber, setOrderNumber] = useState('');
     const [searchId, setSearchId] = useState('');
     const { data: order, isLoading, isError } = useOrder(searchId);
+    const { data: myOrders = [], isLoading: isLoadingOrders } = useOrders();
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         if (orderNumber) {
             setSearchId(orderNumber);
         }
+    };
+
+    const handleSelectOrder = (id: string) => {
+        setSearchId(id);
+        setOrderNumber(id);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const getStepIcon = (status: string) => {
@@ -217,6 +228,61 @@ export default function EntregaPage() {
                             </Box>
                         )}
                     </AnimatePresence>
+
+                    {user && myOrders.length > 0 && !searchId && (
+                        <Box sx={{ mt: 8 }}>
+                            <Typography variant="h4" sx={{ 
+                                color: 'white', 
+                                mb: 4, 
+                                fontFamily: 'var(--font-playfair)',
+                                textAlign: 'center'
+                            }}>
+                                Suas Entregas
+                            </Typography>
+                            <Grid container spacing={3}>
+                                {myOrders.filter((o: any) => o.status !== 'CANCELLED').map((myOrder: any) => (
+                                    <Grid size={{ xs: 12, sm: 6 }} key={myOrder.id}>
+                                        <Paper 
+                                            onClick={() => handleSelectOrder(myOrder.id)}
+                                            sx={{ 
+                                                p: 3, 
+                                                backgroundColor: 'rgba(255,255,255,0.03)',
+                                                borderRadius: 4,
+                                                border: '1px solid rgba(175, 148, 79, 0.2)',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.3s ease',
+                                                '&:hover': {
+                                                    backgroundColor: 'rgba(175, 148, 79, 0.05)',
+                                                    borderColor: '#AF944F',
+                                                    transform: 'translateY(-5px)'
+                                                }
+                                            }}
+                                        >
+                                            <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                                <Box>
+                                                    <Typography sx={{ color: '#AF944F', fontWeight: 700, mb: 0.5 }}>
+                                                        #{myOrder.orderNumber}
+                                                    </Typography>
+                                                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)' }}>
+                                                        {format(new Date(myOrder.createdAt), "dd/MM/yyyy")}
+                                                    </Typography>
+                                                </Box>
+                                                <Chip 
+                                                    label={myOrder.status} 
+                                                    size="small"
+                                                    sx={{ 
+                                                        backgroundColor: 'rgba(255,255,255,0.05)', 
+                                                        color: 'white',
+                                                        fontSize: '0.7rem'
+                                                    }} 
+                                                />
+                                            </Stack>
+                                        </Paper>
+                                    </Grid>
+                                ))}
+                            </Grid>
+                        </Box>
+                    )}
 
                     <Box sx={{ mt: 4, textAlign: 'center' }}>
                         <Link href="/" passHref style={{ textDecoration: 'none' }}>

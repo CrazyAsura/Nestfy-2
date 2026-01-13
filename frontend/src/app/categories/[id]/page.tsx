@@ -57,9 +57,8 @@ export default function CategoryDetails() {
                 </Typography>
             </Box>
 
-            {/* Aqui poderíamos filtrar o ListProducts pela categoria, 
-                mas para este exemplo vamos apenas mostrar o componente */}
-            <ListProducts />
+            {/* Filtra o ListProducts pela categoria selecionada */}
+            <ListProducts categoryId={id as string} showTitle={false} />
         </Container>
     );
 }

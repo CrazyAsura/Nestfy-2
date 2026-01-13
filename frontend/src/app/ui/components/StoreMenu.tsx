@@ -29,6 +29,7 @@ import StoreIcon from '@mui/icons-material/Store'
 import CategoryIcon from '@mui/icons-material/Category'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import ReceiptIcon from '@mui/icons-material/Receipt'
+import LocalShippingIcon from '@mui/icons-material/LocalShipping'
 import NotificationsIcon from '@mui/icons-material/Notifications'
 import PersonIcon from '@mui/icons-material/Person'
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
@@ -141,7 +142,13 @@ export function StoreMenu() {
                 { label: 'HOME', href: '/' },
                 { label: 'COLEÇÕES', href: '/categories' },
                 { label: 'PRODUTOS', href: '/products' },
-                ...(user ? [{ label: 'PEDIDOS', href: '/orders' }] : [])
+                ...(user ? [
+                  { label: 'PEDIDOS', href: '/orders' },
+                  { label: 'ENTREGAS', href: '/entrega' }
+                ] : []),
+                ...(user?.role === 'ADMIN' ? [
+                  { label: 'ADMIN', href: '/admin' }
+                ] : [])
               ].map((item) => (
                 <Typography 
                   key={item.label}
@@ -357,6 +364,36 @@ export function StoreMenu() {
                   <ListItemButton component={Link} href="/orders" onClick={toggleDrawer(false)}>
                     <ListItemIcon sx={{ color: 'inherit' }}><ReceiptIcon /></ListItemIcon>
                     <ListItemText primary="Orders" />
+                  </ListItemButton>
+                </MotionListItem>
+              )}
+
+              {/* ORDERS (SÓ LOGADO) */}
+              {user && (
+                <MotionListItem 
+                  key="orders" 
+                  variants={itemVariants}
+                  whileHover={{ x: 10, backgroundColor: 'action.hover' }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <ListItemButton component={Link} href="/orders" onClick={toggleDrawer(false)}>
+                    <ListItemIcon sx={{ color: 'inherit' }}><ReceiptIcon /></ListItemIcon>
+                    <ListItemText primary="Pedidos" />
+                  </ListItemButton>
+                </MotionListItem>
+              )}
+
+              {/* ENTREGA (SÓ LOGADO) */}
+              {user && (
+                <MotionListItem 
+                  key="entrega" 
+                  variants={itemVariants}
+                  whileHover={{ x: 10, backgroundColor: 'action.hover' }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <ListItemButton component={Link} href="/entrega" onClick={toggleDrawer(false)}>
+                    <ListItemIcon sx={{ color: 'inherit' }}><LocalShippingIcon /></ListItemIcon>
+                    <ListItemText primary="Entregas" />
                   </ListItemButton>
                 </MotionListItem>
               )}

@@ -102,9 +102,22 @@ import {
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
-type Section = 'dashboard' | 'users' | 'products' | 'categories' | 'orders' | 'activity-logs' | 'finance';
+import { useSelector } from 'react-redux';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+
+type Section = 'dashboard' | 'users' | 'products' | 'categories' | 'orders' | 'deliveries' | 'activity-logs' | 'finance';
 
 export default function AdminPage() {
+  const { user } = useSelector((state: any) => state.auth);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!user || user.role !== Role.ADMIN) {
+      router.push('/');
+    }
+  }, [user, router]);
+
   const [activeSection, setActiveSection] = useState<Section>('dashboard');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -211,11 +224,13 @@ export default function AdminPage() {
       ...prev,
       [userId]: !prev[userId]
     }));
-  const handleSectionChange = (section: Section) => {
+  };
+
+  const handleSectionChange = (section: Section, initialFilter: string = 'ALL') => {
     setActiveSection(section);
     setPage(0);
     setSearchTerm('');
-    setStatusFilter('ALL');
+    setStatusFilter(initialFilter);
   };
 
   const handleOpenDeliveryDialog = (order: any) => {
@@ -1020,6 +1035,139 @@ export default function AdminPage() {
           </Box>
          );
  
+       case 'deliveries':
+        if (ordersError) {
+          return (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              Erro ao carregar lista de entregas.
+            </Alert>
+          );
+        }
+
+        const deliveryOrders = orders?.filter((order: any) => {
+          const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                               order.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                               order.trackingCode?.toLowerCase().includes(searchTerm.toLowerCase());
+          
+          if (statusFilter === 'HISTORY') {
+            return matchesSearch && (order.status === 'DELIVERED' || order.status === 'CANCELLED');
+          }
+          if (statusFilter === 'ACTIVE') {
+            return matchesSearch && (order.status === 'SHIPPED' || order.status === 'PROCESSING' || order.status === 'PENDING');
+          }
+          
+          const matchesStatus = statusFilter === 'ALL' || order.status === statusFilter;
+          return matchesSearch && matchesStatus;
+        });
+
+        return (
+          <Box>
+            <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+              <TextField
+                size="small"
+                placeholder="Buscar entregas (ID, cliente, rastreio...)"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                sx={{ flexGrow: 1, maxWidth: 400 }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon fontSize="small" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <FormControl size="small" sx={{ minWidth: 200 }}>
+                <InputLabel>Visualização</InputLabel>
+                <Select
+                  value={statusFilter === 'ALL' ? 'ACTIVE' : statusFilter}
+                  label="Visualização"
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <MenuItem value="ACTIVE">Entregas Ativas</MenuItem>
+                  <MenuItem value="HISTORY">Histórico de Entregas</MenuItem>
+                  <MenuItem value="SHIPPED">Apenas Enviados</MenuItem>
+                  <MenuItem value="DELIVERED">Apenas Entregues</MenuItem>
+                  <MenuItem value="ALL">Todos os Pedidos</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+
+            <TableContainer component={Paper} variant="outlined">
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>ID / Rastreio</TableCell>
+                    <TableCell>Cliente</TableCell>
+                    <TableCell>Status</TableCell>
+                    <TableCell>Última Atualização</TableCell>
+                    <TableCell align="right">Ações</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {ordersLoading ? (
+                    <TableRow><TableCell colSpan={5} align="center"><CircularProgress /></TableCell></TableRow>
+                  ) : deliveryOrders?.length === 0 ? (
+                    <TableRow><TableCell colSpan={5} align="center">Nenhuma entrega encontrada</TableCell></TableRow>
+                  ) : deliveryOrders?.map((order: any) => (
+                    <TableRow key={order.id} hover>
+                      <TableCell>
+                        <Typography variant="body2" fontWeight="bold">#{order.id.substring(0, 8)}</Typography>
+                        <Typography variant="caption" sx={{ color: order.trackingCode ? 'primary.main' : 'text.disabled' }}>
+                          {order.trackingCode || 'Sem código de rastreio'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">{order.user?.name}</Typography>
+                        <Typography variant="caption" color="textSecondary">{order.user?.city}, {order.user?.state}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip 
+                          label={order.status} 
+                          size="small" 
+                          variant="outlined"
+                          color={
+                            order.status === 'DELIVERED' ? 'success' : 
+                            order.status === 'SHIPPED' ? 'primary' : 
+                            order.status === 'PROCESSING' ? 'info' : 
+                            order.status === 'CANCELLED' ? 'error' : 'warning'
+                          } 
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {order.trackingHistory && order.trackingHistory.length > 0 ? (
+                          <Box>
+                            <Typography variant="caption" display="block">
+                              {new Date(order.trackingHistory[order.trackingHistory.length - 1].timestamp).toLocaleString('pt-BR')}
+                            </Typography>
+                            <Typography variant="caption" color="textSecondary" noWrap sx={{ maxWidth: 200, display: 'block' }}>
+                              {order.trackingHistory[order.trackingHistory.length - 1].status}
+                            </Typography>
+                          </Box>
+                        ) : (
+                          <Typography variant="caption" color="text.disabled">Sem atualizações</Typography>
+                        )}
+                      </TableCell>
+                      <TableCell align="right">
+                        <Button 
+                          size="small" 
+                          startIcon={<EditIcon />} 
+                          onClick={() => handleOpenDeliveryDialog(order)}
+                          variant="contained"
+                          color="primary"
+                          sx={{ borderRadius: 2 }}
+                        >
+                          Atualizar
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+        );
+
        case 'orders':
         if (ordersError) {
           return (
@@ -1289,6 +1437,14 @@ export default function AdminPage() {
                 <ListItemIcon><ShoppingCartIcon color={activeSection === 'orders' ? 'primary' : 'inherit'} /></ListItemIcon>
                 <ListItemText primary="Pedidos" />
               </ListItemButton>
+              <ListItemButton selected={activeSection === 'deliveries' && statusFilter !== 'HISTORY'} onClick={() => handleSectionChange('deliveries', 'ACTIVE')} sx={{ borderRadius: 2, mb: 0.5 }}>
+                <ListItemIcon><LocalShippingIcon color={activeSection === 'deliveries' && statusFilter !== 'HISTORY' ? 'primary' : 'inherit'} /></ListItemIcon>
+                <ListItemText primary="Gestão de Entregas" />
+              </ListItemButton>
+              <ListItemButton selected={activeSection === 'deliveries' && statusFilter === 'HISTORY'} onClick={() => handleSectionChange('deliveries', 'HISTORY')} sx={{ borderRadius: 2, mb: 0.5 }}>
+                <ListItemIcon><HistoryIcon color={activeSection === 'deliveries' && statusFilter === 'HISTORY' ? 'primary' : 'inherit'} /></ListItemIcon>
+                <ListItemText primary="Histórico de Entregas" />
+              </ListItemButton>
               <ListItemButton selected={activeSection === 'activity-logs'} onClick={() => handleSectionChange('activity-logs')} sx={{ borderRadius: 2, mb: 0.5 }}>
                 <ListItemIcon><HistoryIcon color={activeSection === 'activity-logs' ? 'primary' : 'inherit'} /></ListItemIcon>
                 <ListItemText primary="Logs de Atividade" />
@@ -1305,7 +1461,9 @@ export default function AdminPage() {
             <Box sx={{ p: 4 }}>
               <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography variant="h5" fontWeight="900" sx={{ textTransform: 'uppercase' }}>
-                  {activeSection.replace('-', ' ')}
+                  {activeSection === 'deliveries' 
+                    ? (statusFilter === 'HISTORY' ? 'Histórico de Entregas' : 'Gestão de Entregas')
+                    : activeSection.replace('-', ' ')}
                 </Typography>
                 <Typography variant="caption" color="textSecondary">
                   Bem-vindo, Administrador
@@ -1330,4 +1488,3 @@ export default function AdminPage() {
     </Container>
   );
  } 
-}
