@@ -12,20 +12,4 @@ services:
       - key: PORT
         value: 8080
       - key: FRONTEND_URL
-        fromService:
-          type: web
-          name: nestfy-frontend
-          property: host
-
-  # Frontend service
-  - type: web
-    name: nestfy-frontend
-    env: node
-    rootDir: frontend
-    buildCommand: npm install --legacy-peer-deps && npm run build
-    startCommand: npm run start
-    envVars:
-      - key: NODE_VERSION
-        value: 20
-      - key: NEXT_PUBLIC_API_URL
-        value: https://nestfy-backend.onrender.com # Ou use o valor dinâmico se preferir, mas fixar ajuda a evitar erros de protocolo
+        value: https://nestfy-1.vercel.app # URL padrão do frontend (ajuste se necessário no painel do Render)

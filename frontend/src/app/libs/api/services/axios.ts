@@ -5,17 +5,8 @@ export const getSocketBaseURL = () => {
     let apiUrl = process.env.NEXT_PUBLIC_API_URL;
     
     if (!apiUrl && typeof window !== 'undefined' && !window.location.hostname.includes('localhost')) {
-        const hostname = window.location.hostname;
-        if (hostname.includes('onrender.com')) {
-            // Se o frontend está em nestfy-2.onrender.com, tenta nestfy-backend.onrender.com ou similar
-            // No render.yaml definimos o nome como nestfy-backend
-            apiUrl = 'https://nestfy-backend.onrender.com';
-            
-            // Caso especial do usuário: nestfy-2.onrender.com -> nestfy-2-backend.onrender.com
-            if (hostname === 'nestfy-2.onrender.com') {
-                apiUrl = 'https://nestfy-2-backend.onrender.com';
-            }
-        }
+        // Como o backend agora está fixo no Render, apontamos para lá
+        apiUrl = 'https://nestfy-backend.onrender.com';
     }
 
     if (apiUrl) {
