@@ -28,9 +28,11 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://nestfy-2-production.up.railway.app';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     
-    // Garantir que a URL tenha o protocolo para o proxy funcionar
+    if (!apiUrl) {
+      return []; // Se não houver URL da API, não faz rewrites para evitar apontar para Railway por engano
+    }
     let normalizedApiUrl = apiUrl;
     if (!normalizedApiUrl.startsWith('http')) {
       normalizedApiUrl = `https://${normalizedApiUrl}`;
