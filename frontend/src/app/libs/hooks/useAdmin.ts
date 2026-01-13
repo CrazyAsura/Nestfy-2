@@ -98,10 +98,10 @@ export function useAdminActivityLogs(page: number = 1, limit: number = 10) {
     });
 }
 
-export function useCjProducts(page: number = 1, size: number = 20) {
+export function useCjProducts(page: number = 1, size: number = 20, search?: string) {
     return useQuery({
-        queryKey: ['cj', 'products', page, size],
-        queryFn: () => cjService.fetchCjProducts(page, size),
+        queryKey: ['cj', 'products', page, size, search],
+        queryFn: () => cjService.fetchCjProducts(page, size, search),
     });
 }
 

@@ -134,7 +134,7 @@ export default function AdminPage() {
   const { data: products, isLoading: productsLoading, error: productsError } = useAdminProducts();
   const { data: categories, isLoading: categoriesLoading, error: categoriesError } = useAdminCategories();
   const { data: orders, isLoading: ordersLoading, error: ordersError } = useAdminOrders();
-  const { data: cjProducts, isLoading: cjLoading } = useCjProducts(page + 1, rowsPerPage);
+  const { data: cjProducts, isLoading: cjLoading } = useCjProducts(page + 1, rowsPerPage, searchTerm);
 
   // Mutations
   const deleteUserMutation = useDeleteUser();

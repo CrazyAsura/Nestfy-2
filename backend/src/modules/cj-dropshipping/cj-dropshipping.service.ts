@@ -6,7 +6,7 @@ import { ProductService } from '../product/product.service';
 @Injectable()
 export class CjDropshippingService {
   private readonly logger = new Logger(CjDropshippingService.name);
-  private readonly baseUrl = 'https://cj-dropshipping.com/api/v1';
+  private readonly baseUrl = 'https://developers.cjdropshipping.com/api/v1';
 
   constructor(
     private configService: ConfigService,
@@ -24,25 +24,46 @@ export class CjDropshippingService {
     };
   }
 
-  async getProducts(page: number = 1, size: number = 20) {
+  async getProducts(page: number = 1, size: number = 20, searchTerm?: string) {
     try {
+      this.logger.log(`Fetching products from CJ (Page: ${page}, Size: ${size}, Search: ${searchTerm || 'none'})...`);
       const response = await axios.get(`${this.baseUrl}/product/list`, {
         headers: this.headers,
-        params: { pageNum: page, pageSize: size },
+        params: { 
+          pageNumber: page, 
+          pageSize: size,
+          productName: searchTerm
+        },
       });
+      
+      if (response.data && response.data.code === 200) {
+        return response.data.data;
+      }
+      
+      this.logger.warn(`CJ API returned non-200 code: ${JSON.stringify(response.data)}`);
       return response.data;
     } catch (error) {
       this.logger.error(`Error fetching products from CJ: ${error.message}`);
+      if (error.response) {
+        this.logger.error(`Response data: ${JSON.stringify(error.response.data)}`);
+      }
       throw error;
     }
   }
 
   async getProductDetail(pid: string) {
     try {
+      this.logger.log(`Fetching detail for CJ product: ${pid}`);
       const response = await axios.get(`${this.baseUrl}/product/detail`, {
         headers: this.headers,
         params: { pid },
       });
+
+      if (response.data && response.data.code === 200) {
+        return response.data.data;
+      }
+
+      this.logger.warn(`CJ API returned non-200 code for detail: ${JSON.stringify(response.data)}`);
       return response.data;
     } catch (error) {
       this.logger.error(`Error fetching product detail from CJ: ${error.message}`);
@@ -65,16 +86,14 @@ export class CjDropshippingService {
 
   async importProduct(pid: string, categoryId: string) {
     try {
-      const cjProduct = await this.getProductDetail(pid);
-      if (!cjProduct || !cjProduct.data) {
+      const data = await this.getProductDetail(pid);
+      if (!data) {
         throw new NotFoundException('Product not found in CJ');
       }
 
-      const data = cjProduct.data;
-
       const productDto = {
-        name: data.productName,
-        description: data.description || data.productName,
+        name: data.productName || data.productNameEn,
+        description: data.description || data.productNameEn || data.productName,
         price: data.sellPrice || 0,
         categoryId: categoryId,
         stock: data.inventory || 0,

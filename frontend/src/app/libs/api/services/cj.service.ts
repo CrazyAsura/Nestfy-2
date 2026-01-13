@@ -1,9 +1,9 @@
 import { api } from './axios';
 import { API_ROUTES } from '../routes';
 
-export async function fetchCjProducts(page: number = 1, size: number = 20) {
+export async function fetchCjProducts(page: number = 1, size: number = 20, search?: string) {
   const response = await api.get(API_ROUTES.CJ_DROPSHIPPING.PRODUCTS, {
-    params: { page, size },
+    params: { page, size, search },
   });
   return response.data;
 }

@@ -9,8 +9,9 @@ export class CjDropshippingController {
   async getProducts(
     @Query('page') page: number,
     @Query('size') size: number,
+    @Query('search') search?: string,
   ) {
-    return this.cjService.getProducts(page, size);
+    return this.cjService.getProducts(page, size, search);
   }
 
   @Get('products/:pid')
