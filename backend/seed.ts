@@ -30,44 +30,22 @@ async function seed() {
         const adminPassword = 'None@3355';
 
         const existingAdmin = await UserModel.findOne({ email: adminEmail });
-        if (existingAdmin) {
-            await UserModel.deleteOne({ _id: existingAdmin._id });
+        if (!existingAdmin) {
+            const hashedPassword = await argon.hash(adminPassword);
+            const admin = new UserModel({
+                name: 'Administrador Nestfy',
+                email: adminEmail,
+                password: hashedPassword,
+                role: Role.ADMIN,
+                userType: UserType.INDIVIDUAL,
+                document: '00000000000',
+                isActive: true
+            });
+            await admin.save();
+            console.log('✅ Administrador criado com sucesso!');
+        } else {
+            console.log('ℹ️ Administrador já existe, pulando seed.');
         }
-
-        const hashedPassword = await argon.hash(adminPassword);
-        const admin = new UserModel({
-            name: 'Administrador Nestfy',
-            email: adminEmail,
-            password: hashedPassword,
-            role: Role.ADMIN,
-            userType: UserType.INDIVIDUAL,
-            document: '00000000000',
-            isActive: true
-        });
-        await admin.save();
-        console.log('✅ Administrador recriado com sucesso!');
-
-        // 1.1 Seed User Leon
-        const leonEmail = 'leoncdzt@gmail.com'.toLowerCase();
-        const leonPassword = 'password123';
-
-        const existingLeon = await UserModel.findOne({ email: leonEmail });
-        if (existingLeon) {
-            await UserModel.deleteOne({ _id: existingLeon._id });
-        }
-
-        const hashedLeonPassword = await argon.hash(leonPassword);
-        const leonUser = new UserModel({
-            name: 'Leon',
-            email: leonEmail,
-            password: hashedLeonPassword,
-            role: Role.USER,
-            userType: UserType.INDIVIDUAL,
-            document: '11111111111',
-            isActive: true
-        });
-        await leonUser.save();
-        console.log('✅ Usuário Leon criado com sucesso!');
 
         // 2. Seed Categorias (10)
         const categoriasData = [

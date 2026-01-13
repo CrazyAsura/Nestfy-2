@@ -51,37 +51,8 @@ export class SeedService {
       await admin.save();
       this.logger.log(`✅ Usuário Admin criado: ${adminEmail}`);
     } else {
-      // Atualizar senha do admin existente para garantir que está correta
-      existingAdmin.password = hashedAdminPassword;
-      existingAdmin.isActive = true;
-      existingAdmin.role = Role.ADMIN;
-      await existingAdmin.save();
-      this.logger.log(`✅ Usuário Admin atualizado: ${adminEmail}`);
-    }
-
-    // 2. Seed Leon
-    const leonEmail = 'leoncdzt@gmail.com'.toLowerCase();
-    const leonPassword = 'password123';
-    const hashedLeonPassword = await argon.hash(leonPassword);
-
-    const existingLeon = await this.userModel.findOne({ email: leonEmail });
-    if (!existingLeon) {
-      const leonUser = new this.userModel({
-        name: 'Leon',
-        email: leonEmail,
-        password: hashedLeonPassword,
-        role: Role.USER,
-        userType: UserType.INDIVIDUAL,
-        document: '11111111111',
-        isActive: true
-      });
-      await leonUser.save();
-      this.logger.log(`✅ Usuário Leon criado: ${leonEmail}`);
-    } else {
-      existingLeon.password = hashedLeonPassword;
-      existingLeon.isActive = true;
-      await existingLeon.save();
-      this.logger.log(`✅ Usuário Leon atualizado: ${leonEmail}`);
+      // Opcional: Atualizar outros campos se necessário, mas EVITAR resetar a senha se já existir
+      this.logger.log(`ℹ️ Usuário Admin já existe: ${adminEmail} (senha preservada)`);
     }
   }
 

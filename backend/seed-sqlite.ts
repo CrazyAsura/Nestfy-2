@@ -58,23 +58,6 @@ async function seed() {
     await userRepository.save(admin);
     console.log('✅ Administrador recriado com sucesso!');
 
-    // 1.1 Seed User Leon
-    const leonEmail = 'leoncdzt@gmail.com'.toLowerCase();
-    const leonPassword = 'password123';
-    await userRepository.delete({ email: leonEmail });
-    const hashedLeonPassword = await argon.hash(leonPassword);
-    const leonUser = userRepository.create({
-      name: 'Leon',
-      email: leonEmail,
-      password: hashedLeonPassword,
-      role: Role.USER,
-      userType: UserType.INDIVIDUAL,
-      document: '11111111111',
-      isActive: true
-    });
-    await userRepository.save(leonUser);
-    console.log('✅ Usuário Leon criado com sucesso!');
-
     // 2. Seed Categorias (10)
     const categoriasData = [
       { name: 'Eletrônicos', slug: 'eletronicos' },

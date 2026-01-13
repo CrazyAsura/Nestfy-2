@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, HydratedDocument } from 'mongoose';
+import { Document } from 'mongoose';
 import { OrderStatus, PaymentStatus } from '../../../constants/enums';
 
-export type OrderDocument = HydratedDocument<Order>;
+export type OrderDocument = Order & Document;
 
 @Schema({ timestamps: true, collection: 'orders' })
 export class Order {

@@ -1329,5 +1329,5 @@ export default function AdminPage() {
       </Snackbar>
     </Container>
   );
- }
+ } 
 }
