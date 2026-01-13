@@ -14,6 +14,14 @@ const nextConfig: NextConfig = {
         hostname: 'nestfy-2-production.up.railway.app',
       },
       {
+        protocol: 'https',
+        hostname: 'nestfy-2.onrender.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'nestfy-2-backend.onrender.com',
+      },
+      {
         protocol: 'http',
         hostname: 'localhost',
       },

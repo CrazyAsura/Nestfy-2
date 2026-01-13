@@ -26,6 +26,7 @@ import { ChatbotService } from './chatbot.service';
         allowedOrigins.includes(origin) ||
         origin.endsWith('.vercel.app') ||
         origin.includes('railway.app') ||
+        origin.includes('onrender.com') ||
         process.env.NODE_ENV === 'development'
       ) {
         callback(null, true);

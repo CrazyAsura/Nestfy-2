@@ -5,7 +5,16 @@ export const getSocketBaseURL = () => {
     let apiUrl = process.env.NEXT_PUBLIC_API_URL;
     
     if (!apiUrl && typeof window !== 'undefined' && !window.location.hostname.includes('localhost')) {
-        apiUrl = 'https://nestfy-2-production.up.railway.app';
+        if (window.location.hostname.includes('onrender.com')) {
+            // Se estiver no Render, tenta inferir a URL do backend (geralmente o mesmo domínio ou subdomínio)
+            apiUrl = window.location.origin.replace('frontend', 'backend'); 
+            // Ou se o usuário forneceu https://nestfy-2.onrender.com/, podemos tentar https://nestfy-2-backend.onrender.com/
+            if (window.location.hostname === 'nestfy-2.onrender.com') {
+                apiUrl = 'https://nestfy-2-backend.onrender.com';
+            }
+        } else {
+            apiUrl = 'https://nestfy-2-production.up.railway.app';
+        }
     }
 
     if (apiUrl) {

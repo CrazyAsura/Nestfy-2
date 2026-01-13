@@ -10,9 +10,11 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
 import { RedisIoAdapter } from './common/adapters/redis-io.adapter';
 import * as dotenv from 'dotenv';
 
-// Carrega o .env da pasta raiz ou da pasta backend
+// Carrega o .env
 dotenv.config();
-dotenv.config({ path: join(process.cwd(), 'backend', '.env') });
+// Tenta carregar de backend/.env se existir (útil para desenvolvimento local na raiz do monorepo)
+const backendEnv = join(process.cwd(), 'backend', '.env');
+dotenv.config({ path: backendEnv });
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { rawBody: true });
@@ -66,6 +68,7 @@ async function bootstrap() {
         allowedOrigins.includes(origin) || 
         origin.endsWith('.vercel.app') ||
         origin.includes('railway.app') ||
+        origin.includes('onrender.com') ||
         process.env.NODE_ENV === 'development'
       ) {
         callback(null, true);
