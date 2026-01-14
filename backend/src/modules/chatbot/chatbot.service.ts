@@ -34,7 +34,8 @@ export class ChatbotService implements OnModuleInit {
 
   private initLLM() {
     try {
-      const provider = this.configService.get<string>('AI_PROVIDER') || 'ollama';
+      const provider = this.configService.get<string>('AI_PROVIDER') || 'free-llama';
+      this.logger.log(`Inicializando provedor de IA: ${provider}`);
       
       if (provider === 'ollama') {
         let baseUrl = this.configService.get<string>('OLLAMA_BASE_URL') || "http://localhost:11434";
@@ -165,10 +166,15 @@ export class ChatbotService implements OnModuleInit {
         return content;
       }
     } catch (error) {
-      this.logger.error(`Erro ao processar mensagem com LLM: ${error.message}`);
-      if (error.message.includes('ECONNREFUSED') || error.message.includes('fetch failed')) {
+      const provider = this.configService.get<string>('AI_PROVIDER') || 'free-llama';
+      this.logger.error(`Erro ao processar mensagem com LLM (${provider}): ${error.message}`);
+      
+      if ((error.message.includes('ECONNREFUSED') || error.message.includes('fetch failed')) && provider === 'ollama') {
         this.logger.warn('DICA: O backend no Render não consegue acessar o Ollama no seu localhost. Use um túnel (Ngrok) ou mude o AI_PROVIDER para um serviço na nuvem.');
+      } else if (error.message.includes('fetch failed') && provider === 'free-llama') {
+        this.logger.warn('AVISO: O provedor de IA gratuito está instável no momento. Usando resposta inteligente de segurança.');
       }
+      
       return this.getSmartFallbackResponse(message);
     }
 
