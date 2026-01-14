@@ -5,10 +5,8 @@ import { Box, CircularProgress, Typography } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { api } from '@/app/libs/api/services/axios';
 
-// Inicialize com sua chave pública
-const publicKey = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY || '';
-
 export default function MercadoPagoBrick({ amount, items, onSuccess }: { amount: number, items: any[], onSuccess?: (result: any) => void }) {
+    const publicKey = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY || '';
     const [loading, setLoading] = useState(true);
     const [isInitialized, setIsInitialized] = useState(false);
 
@@ -16,8 +14,10 @@ export default function MercadoPagoBrick({ amount, items, onSuccess }: { amount:
         if (publicKey) {
             initMercadoPago(publicKey, { locale: 'pt-BR' });
             setIsInitialized(true);
+        } else {
+            console.error('Mercado Pago Public Key não encontrada em process.env.NEXT_PUBLIC_MP_PUBLIC_KEY');
         }
-    }, []);
+    }, [publicKey]);
 
     const initialization = {
         amount: amount,
