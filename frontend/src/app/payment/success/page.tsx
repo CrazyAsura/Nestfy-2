@@ -19,8 +19,13 @@ import { api } from '@/app/libs/api/services/axios';
 export default function PaymentSuccessPage() {
     const searchParams = useSearchParams();
     const sessionId = searchParams.get('session_id');
-    const [loading, setLoading] = useState(!!sessionId);
+    const paymentId = searchParams.get('payment_id');
+    const mpStatus = searchParams.get('status');
+    
+    const [loading, setLoading] = useState(!!sessionId && !paymentId);
     const [status, setStatus] = useState<any>(null);
+
+    const isSuccess = status?.status === 'paid' || mpStatus === 'approved' || (!sessionId && !paymentId);
 
     useEffect(() => {
         if (sessionId) {
@@ -79,10 +84,10 @@ export default function PaymentSuccessPage() {
                             display: 'flex', 
                             justifyContent: 'center', 
                             mb: 4,
-                            color: status?.status === 'paid' || !sessionId ? 'success.main' : 'warning.main'
+                            color: isSuccess ? 'success.main' : 'warning.main'
                         }}
                     >
-                        {status?.status === 'paid' || !sessionId ? (
+                        {isSuccess ? (
                             <CheckCircle sx={{ fontSize: 100 }} />
                         ) : (
                             <ErrorOutline sx={{ fontSize: 100 }} />
@@ -90,12 +95,12 @@ export default function PaymentSuccessPage() {
                     </Box>
 
                     <Typography variant="h3" fontWeight={900} mb={2} color="text.primary">
-                        {status?.status === 'paid' || !sessionId ? 'PAGAMENTO APROVADO!' : 'PROCESSANDO PAGAMENTO'}
+                        {isSuccess ? 'PAGAMENTO APROVADO!' : 'PROCESSANDO PAGAMENTO'}
                     </Typography>
 
                     <Typography variant="body1" color="text.secondary" mb={6} sx={{ fontSize: '1.1rem' }}>
-                        {status?.status === 'paid' || !sessionId 
-                            ? `Obrigado por sua compra! Seu pedido ${status?.orderNumber ? '#' + status.orderNumber : ''} foi processado com sucesso e em breve você receberá um e-mail com os detalhes do envio.`
+                        {isSuccess 
+                            ? `Obrigado por sua compra! Seu pedido ${status?.orderNumber ? '#' + status.orderNumber : paymentId ? '#' + paymentId : ''} foi processado com sucesso e em breve você receberá um e-mail com os detalhes do envio.`
                             : 'Estamos aguardando a confirmação do seu pagamento. Você pode acompanhar o status na sua conta.'}
                     </Typography>
 

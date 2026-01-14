@@ -9,9 +9,9 @@ import {
     FormControlLabel,
     RadioGroup
 } from '@mui/material';
-import { CreditCard, Pix, Description } from '@mui/icons-material';
+import { CreditCard, Pix, Description, Security } from '@mui/icons-material';
 
-export type PaymentMethod = 'card' | 'pix' | 'boleto';
+export type PaymentMethod = 'card' | 'pix' | 'boleto' | 'mercadopago';
 
 interface PaymentSelectorProps {
     value: PaymentMethod;
@@ -23,6 +23,7 @@ export default function PaymentSelector({ value, onChange }: PaymentSelectorProp
         { id: 'card', label: 'Cartão de Crédito', icon: <CreditCard />, description: 'Até 12x sem juros' },
         { id: 'pix', label: 'PIX', icon: <Pix />, description: 'Aprovação instantânea' },
         { id: 'boleto', label: 'Boleto Bancário', icon: <Description />, description: 'Até 3 dias úteis para compensar' },
+        { id: 'mercadopago', label: 'Mercado Pago', icon: <Security />, description: 'Cartão, Pix e Boleto' },
     ];
 
     return (

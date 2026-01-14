@@ -26,11 +26,12 @@ import PaymentSelector, { PaymentMethod } from '../ui/components/PaymentSelector
 import PixPayment from '../ui/components/PixPayment';
 import BoletoPayment from '../ui/components/BoletoPayment';
 import CreditCardPayment from '../ui/components/CreditCardPayment';
+import MercadoPagoBrick from '../ui/components/MercadoPagoBrick';
 
 export default function CheckoutPage() {
     const { items, totalPrice, clearCart } = useCart();
     const [loading, setLoading] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('mercadopago');
     const [cardConfirmed, setCardConfirmed] = useState(false);
     const [orderData, setOrderData] = useState<{ orderId: string, status: string } | null>(null);
     const user = useSelector((state: RootState) => state.auth.user);
@@ -39,6 +40,12 @@ export default function CheckoutPage() {
     if (!user) {
         redirect('/login?redirect=/checkout');
     }
+
+    const handleMPSuccess = (result: any) => {
+        setOrderData({ orderId: result.id, status: result.status });
+        clearCart();
+        router.push(`/payment/success?payment_id=${result.id}&status=${result.status}`);
+    };
 
     const handleCheckout = async () => {
         try {
@@ -57,6 +64,12 @@ export default function CheckoutPage() {
                 paymentMethod
             });
 
+            if (data.url) {
+                // Se houver uma URL (Stripe ou Mercado Pago), redireciona
+                window.location.href = data.url;
+                return;
+            }
+
             if (paymentMethod === 'card') {
                 const stripe = await getStripe();
                 if (!stripe) {
@@ -64,19 +77,15 @@ export default function CheckoutPage() {
                     return;
                 }
 
-                if (data.url) {
-                    window.location.href = data.url;
-                } else {
-                    const result = await (stripe as any).redirectToCheckout({
-                        sessionId: data.sessionId,
-                    });
+                const result = await (stripe as any).redirectToCheckout({
+                    sessionId: data.sessionId,
+                });
 
-                    if (result.error) {
-                        alert(result.error.message);
-                    }
+                if (result.error) {
+                    alert(result.error.message);
                 }
             } else {
-                // Para PIX e Boleto, mostramos os detalhes do pagamento
+                // Para PIX e Boleto simulados (se não houver URL do MP)
                 setOrderData(data);
                 clearCart();
             }
@@ -192,6 +201,13 @@ export default function CheckoutPage() {
                                     </Typography>
                                 </Box>
                             )}
+                            {paymentMethod === 'mercadopago' && (
+                                <MercadoPagoBrick 
+                                    amount={totalPrice} 
+                                    items={items} 
+                                    onSuccess={handleMPSuccess} 
+                                />
+                            )}
                         </Box>
                     </Stack>
                 </Grid>
@@ -234,24 +250,26 @@ export default function CheckoutPage() {
                             </Typography>
                         </Box>
 
-                        <Button 
-                            variant="contained" 
-                            fullWidth 
-                            size="large" 
-                            onClick={handleCheckout}
-                            disabled={loading || (paymentMethod === 'card' && !cardConfirmed)}
-                            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Lock />}
-                            sx={{ 
-                                borderRadius: 3, 
-                                py: 2, 
-                                fontWeight: 800,
-                                fontSize: '1.1rem',
-                                boxShadow: 4,
-                                opacity: (paymentMethod === 'card' && !cardConfirmed) ? 0.7 : 1
-                            }}
-                        >
-                            {loading ? 'Processando...' : paymentMethod === 'card' ? 'Pagar com Cartão' : 'Finalizar Pedido'}
-                        </Button>
+                        {paymentMethod !== 'mercadopago' && (
+                            <Button 
+                                variant="contained" 
+                                fullWidth 
+                                size="large" 
+                                onClick={handleCheckout}
+                                disabled={loading || (paymentMethod === 'card' && !cardConfirmed)}
+                                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Lock />}
+                                sx={{ 
+                                    borderRadius: 3, 
+                                    py: 2, 
+                                    fontWeight: 800,
+                                    fontSize: '1.1rem',
+                                    boxShadow: 4,
+                                    opacity: (paymentMethod === 'card' && !cardConfirmed) ? 0.7 : 1
+                                }}
+                            >
+                                {loading ? 'Processando...' : paymentMethod === 'card' ? 'Pagar com Cartão' : 'Finalizar Pedido'}
+                            </Button>
+                        )}
                         
                         {(paymentMethod === 'card' && !cardConfirmed) && (
                             <Typography variant="caption" color="error" textAlign="center" display="block" mt={1} fontWeight="bold">
@@ -262,6 +280,8 @@ export default function CheckoutPage() {
                         <Typography variant="caption" color="text.secondary" textAlign="center" display="block" mt={2}>
                             {paymentMethod === 'card' 
                                 ? 'Pagamento seguro processado pelo Stripe' 
+                                : paymentMethod === 'mercadopago'
+                                ? 'Pagamento seguro processado pelo Mercado Pago'
                                 : 'Finalize o pedido para gerar os dados de pagamento'}
                         </Typography>
                     </Paper>

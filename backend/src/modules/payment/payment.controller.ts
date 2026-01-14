@@ -25,6 +25,20 @@ export class PaymentController {
     return this.paymentService.handleWebhook(signature, (req as any).rawBody);
   }
 
+  @Post('mercadopago-webhook')
+  handleMPWebhook(@Body() body: any) {
+    return this.paymentService.handleMercadoPagoWebhook(body);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('process-mercadopago')
+  processMercadoPago(
+    @Body() paymentData: any,
+    @CurrentUser() user: any
+  ) {
+    return this.paymentService.processMercadoPagoPayment(paymentData, user.id);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Post('confirm-payment')
   confirmPayment(

@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import Stripe from 'stripe';
+import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 import { Order, OrderDocument } from '../order/schemas/order.schema';
 import { OrderItem, OrderItemDocument } from '../order-item/schemas/order-item.schema';
@@ -13,6 +14,7 @@ import { OrderStatus, PaymentStatus } from '../../constants/enums';
 @Injectable()
 export class PaymentService {
   private stripe: Stripe;
+  private mpClient: MercadoPagoConfig;
   private readonly logger = new Logger(PaymentService.name);
 
   constructor(
@@ -25,14 +27,24 @@ export class PaymentService {
     private notificationService: NotificationService,
     private configService: ConfigService,
   ) {
+    // Stripe Config
     const stripeKey = this.configService.get<string>('STRIPE_SECRET_KEY');
-    if (!stripeKey) {
-      this.logger.error('STRIPE_SECRET_KEY is not defined. Please check your .env file or deployment environment variables.');
-      throw new Error('STRIPE_SECRET_KEY is not defined in environment variables');
+    if (stripeKey) {
+      this.stripe = new Stripe(stripeKey, {
+        apiVersion: '2025-01-27.acacia' as any,
+      });
     }
-    this.stripe = new Stripe(stripeKey, {
-      apiVersion: '2025-01-27.acacia' as any,
-    });
+
+    // Mercado Pago Config
+    const mpAccessToken = this.configService.get<string>('MP_ACCESS_TOKEN');
+    if (mpAccessToken) {
+      this.mpClient = new MercadoPagoConfig({
+        accessToken: mpAccessToken,
+      });
+      this.logger.log('Mercado Pago configurado com sucesso');
+    } else {
+      this.logger.warn('MP_ACCESS_TOKEN não definido');
+    }
   }
 
   async createCheckoutSession(createCheckoutSessionDto: CreateCheckoutSessionDto, userId: string) {
@@ -72,6 +84,11 @@ export class PaymentService {
       })
     );
 
+    // Se for Mercado Pago (PIX ou Boleto ou até Card se preferir)
+    if (paymentMethod === 'pix' || paymentMethod === 'boleto' || paymentMethod === 'mp-card') {
+      return this.createMercadoPagoPreference(validatedItems, userId, paymentMethod);
+    }
+
     const lineItems = validatedItems.map(item => ({
       price_data: {
         currency: 'brl',
@@ -85,12 +102,13 @@ export class PaymentService {
     }));
 
     if (paymentMethod === 'card') {
+      if (!this.stripe) throw new Error('Stripe não configurado');
       const session = await this.stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: lineItems,
         mode: 'payment',
         shipping_address_collection: {
-          allowed_countries: ['BR'], // Permitir apenas Brasil, ou adicione outros
+          allowed_countries: ['BR'],
         },
         phone_number_collection: {
           enabled: true,
@@ -109,56 +127,141 @@ export class PaymentService {
       });
 
       return { sessionId: session.id, url: session.url };
-    } else {
-      // Para PIX e Boleto, criamos o pedido como PENDING
-      const totalAmount = validatedItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-      const totalTaxAmount = validatedItems.reduce((acc, item) => acc + (item.taxes.totalTaxAmount * item.quantity), 0);
-      
-      const newOrder = new this.orderModel({
-        userId,
-        totalAmount,
-        totalTaxAmount,
-        status: OrderStatus.PENDING,
-        paymentStatus: PaymentStatus.PENDING,
-        paymentMethod: paymentMethod.toUpperCase(),
-        items: validatedItems.map(item => ({
-          productId: item.id,
-          quantity: item.quantity,
-          price: item.price,
-          icmsAmount: item.taxes.icmsAmount,
-          ipiAmount: item.taxes.ipiAmount,
-          pisAmount: item.taxes.pisAmount,
-          cofinsAmount: item.taxes.cofinsAmount,
-          totalTaxAmount: item.taxes.totalTaxAmount,
-        }))
+    }
+    
+    // Fallback para simulação se nada acima capturar
+    return this.createSimulatedOrder(validatedItems, userId, paymentMethod);
+  }
+
+  private async createMercadoPagoPreference(validatedItems: any[], userId: string, method: string) {
+    const preference = new Preference(this.mpClient);
+    
+    const items = validatedItems.map(item => ({
+      id: item.id,
+      title: item.name,
+      unit_price: Number(item.price),
+      quantity: Number(item.quantity),
+      currency_id: 'BRL',
+      picture_url: item.image,
+    }));
+
+    try {
+      const response = await preference.create({
+        body: {
+          items,
+          payer: {
+            email: 'cliente@exemplo.com', // Opcional: buscar email do user se disponível
+          },
+          back_urls: {
+            success: `${process.env.FRONTEND_URL}/payment/success`,
+            failure: `${process.env.FRONTEND_URL}/payment/failure`,
+            pending: `${process.env.FRONTEND_URL}/payment/pending`,
+          },
+          auto_return: 'approved',
+          notification_url: `${this.configService.get('BACKEND_URL')}/api/payment/mercadopago-webhook`,
+          metadata: {
+            userId,
+            items: JSON.stringify(validatedItems.map(item => ({
+              id: item.id,
+              quantity: item.quantity,
+              price: item.price,
+              taxes: item.taxes,
+            })))
+          },
+        }
       });
 
-      const savedOrder = await newOrder.save();
-      
-      for (const item of validatedItems) {
-        const orderItem = new this.orderItemModel({
-          orderId: savedOrder._id,
-          productId: item.id,
-          quantity: item.quantity,
-          price: item.price,
-          icmsAmount: item.taxes.icmsAmount,
-          ipiAmount: item.taxes.ipiAmount,
-          pisAmount: item.taxes.pisAmount,
-          cofinsAmount: item.taxes.cofinsAmount,
-          totalTaxAmount: item.taxes.totalTaxAmount,
-        });
-        await orderItem.save();
-      }
-
-      await this.notificationService.create(
-        userId,
-        'Pedido Recebido',
-        `Seu pedido #${savedOrder._id} foi recebido e aguarda pagamento via ${paymentMethod.toUpperCase()}.`,
-        'ORDER_PENDING',
-      );
-
-      return { orderId: savedOrder._id, status: 'PENDING' };
+      return { sessionId: response.id, url: response.init_point };
+    } catch (error) {
+      this.logger.error('Erro ao criar preferência no Mercado Pago:', error);
+      throw new Error('Erro ao processar pagamento com Mercado Pago');
     }
+  }
+
+  async processMercadoPagoPayment(paymentData: any, userId: string) {
+    const payment = new Payment(this.mpClient);
+
+    try {
+      const response = await payment.create({
+        body: {
+          transaction_amount: paymentData.transaction_amount,
+          token: paymentData.token,
+          description: paymentData.description,
+          installments: paymentData.installments,
+          payment_method_id: paymentData.payment_method_id,
+          issuer_id: paymentData.issuer_id,
+          payer: {
+            email: paymentData.payer.email,
+            identification: {
+              type: paymentData.payer.identification.type,
+              number: paymentData.payer.identification.number,
+            },
+          },
+          metadata: {
+            user_id: userId,
+            items: paymentData.metadata?.items,
+          },
+        },
+      });
+
+      // Se o pagamento for aprovado, podemos já adiantar a criação do pedido
+      // Mas o ideal é que o webhook também processe para garantir consistência
+      // Aqui apenas retornamos a resposta para o Checkout Bricks
+      return response;
+    } catch (error) {
+      this.logger.error('Erro ao processar pagamento direto no Mercado Pago:', error);
+      throw new Error('Erro ao processar pagamento: ' + (error.message || 'Erro desconhecido'));
+    }
+  }
+
+  private async createSimulatedOrder(validatedItems: any[], userId: string, paymentMethod: string) {
+    const totalAmount = validatedItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    const totalTaxAmount = validatedItems.reduce((acc, item) => acc + (item.taxes.totalTaxAmount * item.quantity), 0);
+    
+    const newOrder = new this.orderModel({
+      userId,
+      totalAmount,
+      totalTaxAmount,
+      status: OrderStatus.PENDING,
+      paymentStatus: PaymentStatus.PENDING,
+      paymentMethod: paymentMethod.toUpperCase(),
+      items: validatedItems.map(item => ({
+        productId: item.id,
+        quantity: item.quantity,
+        price: item.price,
+        icmsAmount: item.taxes.icmsAmount,
+        ipiAmount: item.taxes.ipiAmount,
+        pisAmount: item.taxes.pisAmount,
+        cofinsAmount: item.taxes.cofinsAmount,
+        totalTaxAmount: item.taxes.totalTaxAmount,
+      }))
+    });
+
+    const savedOrder = await newOrder.save();
+    
+    for (const item of validatedItems) {
+      const orderItem = new this.orderItemModel({
+        orderId: savedOrder._id,
+        productId: item.id,
+        quantity: item.quantity,
+        price: item.price,
+        icmsAmount: item.taxes.icmsAmount,
+        ipiAmount: item.taxes.ipiAmount,
+        pisAmount: item.taxes.pisAmount,
+        cofinsAmount: item.taxes.cofinsAmount,
+        totalTaxAmount: item.taxes.totalTaxAmount,
+      });
+      await orderItem.save();
+    }
+
+    await this.notificationService.create(
+      userId,
+      'Pedido Recebido',
+      `Seu pedido #${savedOrder._id} foi recebido e aguarda pagamento via ${paymentMethod.toUpperCase()}.`,
+      'ORDER_PENDING',
+    );
+
+    return { orderId: savedOrder._id, status: 'PENDING' };
   }
 
   async handleWebhook(signature: string, payload: Buffer) {
@@ -242,6 +345,80 @@ export class PaymentService {
         `Seu pedido #${order.orderNumber} foi processado com sucesso e está sendo preparado para o envio.`,
         'SUCCESS'
       );
+    }
+
+    return { received: true };
+  }
+
+  async handleMercadoPagoWebhook(payload: any) {
+    this.logger.log('Mercado Pago Webhook recebido:', JSON.stringify(payload));
+    
+    const { type, data } = payload;
+
+    if (type === 'payment') {
+      const paymentId = data.id;
+      // Buscar detalhes do pagamento no Mercado Pago
+      try {
+        const response = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+          headers: {
+            'Authorization': `Bearer ${this.configService.get('MP_ACCESS_TOKEN')}`
+          }
+        });
+        const paymentData = await response.json();
+
+        if (paymentData.status === 'approved') {
+          const { metadata } = paymentData;
+          const userId = metadata.user_id;
+          const items = JSON.parse(metadata.items);
+
+          // Criar pedido similar ao Stripe
+          const totalAmount = paymentData.transaction_amount;
+          const totalTaxAmount = items.reduce((acc: number, item: any) => acc + (item.taxes?.totalTaxAmount * item.quantity || 0), 0);
+
+          const newOrder = new this.orderModel({
+            userId,
+            totalAmount,
+            totalTaxAmount,
+            status: OrderStatus.PROCESSING,
+            paymentStatus: PaymentStatus.COMPLETED,
+            paymentMethod: paymentData.payment_method_id.toUpperCase(),
+            orderNumber: `ORD-MP-${Date.now()}`,
+            paymentId: paymentId.toString(),
+          });
+
+          const savedOrder = await newOrder.save();
+
+          const orderItems = items.map((item: any) => ({
+            orderId: (savedOrder as any)._id,
+            productId: item.id,
+            quantity: item.quantity,
+            price: item.price,
+            icmsAmount: item.taxes?.icmsAmount || 0,
+            ipiAmount: item.taxes?.ipiAmount || 0,
+            pisAmount: item.taxes?.pisAmount || 0,
+            cofinsAmount: item.taxes?.cofinsAmount || 0,
+            totalTaxAmount: item.taxes?.totalTaxAmount || 0,
+          }));
+
+          await this.orderItemModel.insertMany(orderItems);
+
+          // Atualizar estoque
+          for (const item of items) {
+            await this.productModel.findByIdAndUpdate(item.id, {
+              $inc: { stock: -item.quantity }
+            });
+          }
+
+          await this.notificationService.create(
+            userId,
+            'Pagamento Aprovado!',
+            `Seu pagamento via Mercado Pago foi confirmado. Pedido #${savedOrder.orderNumber}.`,
+            'SUCCESS'
+          );
+        }
+      } catch (error) {
+        this.logger.error('Erro ao processar webhook do Mercado Pago:', error);
+      }
     }
 
     return { received: true };

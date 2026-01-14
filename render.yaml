@@ -11,6 +11,8 @@ services:
         value: 20
       - key: FRONTEND_URL
         value: https://nestfy-1.vercel.app
+      - key: BACKEND_URL
+        value: https://nestfy-2.onrender.com
       - key: NODE_OPTIONS
         value: --max-old-space-size=450
       - key: OLLAMA_BASE_URL
@@ -25,3 +27,11 @@ services:
         sync: false
       - key: OPENAI_MODEL
         value: gpt-3.5-turbo
+      - key: MP_PUBLIC_KEY
+        value: APP_USR-736d4b5c-a911-47c5-ba14-a9c2516c4100
+      - key: MP_ACCESS_TOKEN
+        value: APP_USR-8670849718654189-011320-57a0012f047b703da033fa42992bf172-2557709656
+      - key: MP_CLIENT_ID
+        value: "8670849718654189"
+      - key: MP_CLIENT_SECRET
+        value: Jy6r7AuAa96b8rNiwFqJALg9TMrXcHQw
