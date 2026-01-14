@@ -9,9 +9,9 @@ import {
     FormControlLabel,
     RadioGroup
 } from '@mui/material';
-import { CreditCard, Pix, Description, Security } from '@mui/icons-material';
+import { Security } from '@mui/icons-material';
 
-export type PaymentMethod = 'card' | 'pix' | 'boleto' | 'mercadopago';
+export type PaymentMethod = 'mercadopago';
 
 interface PaymentSelectorProps {
     value: PaymentMethod;
@@ -20,67 +20,75 @@ interface PaymentSelectorProps {
 
 export default function PaymentSelector({ value, onChange }: PaymentSelectorProps) {
     const methods = [
-        { id: 'card', label: 'Cartão de Crédito', icon: <CreditCard />, description: 'Até 12x sem juros' },
-        { id: 'pix', label: 'PIX', icon: <Pix />, description: 'Aprovação instantânea' },
-        { id: 'boleto', label: 'Boleto Bancário', icon: <Description />, description: 'Até 3 dias úteis para compensar' },
-        { id: 'mercadopago', label: 'Mercado Pago', icon: <Security />, description: 'Cartão, Pix e Boleto' },
+        { id: 'mercadopago', label: 'Pagamento Seguro', icon: <Security />, description: 'Cartão de Crédito, Pix e Boleto' },
     ];
 
     return (
         <Box mb={4}>
             <Typography variant="h6" fontWeight={800} mb={3}>
-                Escolha o Método de Pagamento
+                Método de Pagamento
             </Typography>
 
-            <RadioGroup value={value} onChange={(e) => onChange(e.target.value as PaymentMethod)}>
-                <Grid container spacing={2}>
-                    {methods.map((method) => (
-                        <Grid size={{ xs: 12, sm: 6, md: 4 }} key={method.id}>
-                            <Paper 
-                                elevation={0} 
-                                sx={{ 
-                                    p: 2, 
-                                    borderRadius: 3, 
-                                    border: '2px solid', 
-                                    borderColor: value === method.id ? 'primary.main' : 'divider',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s ease',
-                                    '&:hover': {
-                                        borderColor: 'primary.light',
-                                        bgcolor: 'rgba(0,0,0,0.01)'
-                                    },
-                                    position: 'relative'
-                                }}
-                                onClick={() => onChange(method.id as PaymentMethod)}
-                            >
-                                <Box display="flex" flexDirection="column" alignItems="center" textAlign="center" gap={1}>
-                                    <Box sx={{ 
-                                        color: value === method.id ? 'primary.main' : 'text.secondary',
-                                        fontSize: 32
-                                    }}>
-                                        {method.icon}
-                                    </Box>
-                                    <Typography variant="subtitle1" fontWeight={700}>
-                                        {method.label}
-                                    </Typography>
-                                    <Typography variant="caption" color="text.secondary">
-                                        {method.description}
-                                    </Typography>
-                                </Box>
-                                <Radio 
-                                    value={method.id}
-                                    sx={{ 
-                                        position: 'absolute', 
-                                        top: 8, 
-                                        right: 8,
-                                        p: 0
-                                    }}
-                                />
-                            </Paper>
-                        </Grid>
-                    ))}
-                </Grid>
-            </RadioGroup>
+            <Grid container spacing={2}>
+                {methods.map((method) => (
+                    <Grid size={{ xs: 12 }} key={method.id}>
+                        <Paper 
+                            elevation={0} 
+                            sx={{ 
+                                p: 3, 
+                                borderRadius: 4, 
+                                border: '2px solid', 
+                                borderColor: 'primary.main',
+                                bgcolor: 'rgba(25, 118, 210, 0.04)',
+                                cursor: 'default',
+                                position: 'relative',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 3
+                            }}
+                        >
+                            <Box sx={{ 
+                                color: 'primary.main',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                bgcolor: 'white',
+                                p: 1.5,
+                                borderRadius: '50%',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+                            }}>
+                                <Security sx={{ fontSize: 32 }} />
+                            </Box>
+                            
+                            <Box>
+                                <Typography variant="h6" fontWeight={800} color="text.primary">
+                                    {method.label}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                                    {method.description}
+                                </Typography>
+                            </Box>
+
+                            <Box sx={{ 
+                                ml: 'auto',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1,
+                                px: 2,
+                                py: 0.5,
+                                bgcolor: 'success.main',
+                                borderRadius: 2,
+                                color: 'white'
+                            }}>
+                                <Security sx={{ fontSize: 16 }} />
+                                <Typography variant="caption" fontWeight={800}>
+                                    PROTEGIDO
+                                </Typography>
+                            </Box>
+                        </Paper>
+                    </Grid>
+                ))}
+            </Grid>
         </Box>
     );
 }

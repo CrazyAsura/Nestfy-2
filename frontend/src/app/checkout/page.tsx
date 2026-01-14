@@ -23,16 +23,11 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/app/libs/stores';
 import { redirect, useRouter } from 'next/navigation';
 import PaymentSelector, { PaymentMethod } from '../ui/components/PaymentSelector';
-import PixPayment from '../ui/components/PixPayment';
-import BoletoPayment from '../ui/components/BoletoPayment';
-import CreditCardPayment from '../ui/components/CreditCardPayment';
 import MercadoPagoBrick from '../ui/components/MercadoPagoBrick';
 
 export default function CheckoutPage() {
     const { items, totalPrice, clearCart } = useCart();
-    const [loading, setLoading] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('mercadopago');
-    const [cardConfirmed, setCardConfirmed] = useState(false);
     const [orderData, setOrderData] = useState<{ orderId: string, status: string } | null>(null);
     const user = useSelector((state: RootState) => state.auth.user);
     const router = useRouter();
@@ -45,56 +40,6 @@ export default function CheckoutPage() {
         setOrderData({ orderId: result.id, status: result.status });
         clearCart();
         router.push(`/payment/success?payment_id=${result.id}&status=${result.status}`);
-    };
-
-    const handleCheckout = async () => {
-        try {
-            setLoading(true);
-
-            const checkoutItems = items.map(item => ({
-                id: item.id,
-                name: item.name,
-                price: item.discountPrice || item.price,
-                quantity: item.quantity,
-                image: item.images?.[0]?.url || ''
-            }));
-
-            const { data } = await api.post('/payment/create-checkout-session', {
-                items: checkoutItems,
-                paymentMethod
-            });
-
-            if (data.url) {
-                // Se houver uma URL (Stripe ou Mercado Pago), redireciona
-                window.location.href = data.url;
-                return;
-            }
-
-            if (paymentMethod === 'card') {
-                const stripe = await getStripe();
-                if (!stripe) {
-                    alert('Erro ao carregar o Stripe');
-                    return;
-                }
-
-                const result = await (stripe as any).redirectToCheckout({
-                    sessionId: data.sessionId,
-                });
-
-                if (result.error) {
-                    alert(result.error.message);
-                }
-            } else {
-                // Para PIX e Boleto simulados (se não houver URL do MP)
-                setOrderData(data);
-                clearCart();
-            }
-        } catch (error) {
-            console.error('Erro no checkout:', error);
-            alert('Erro ao processar o pagamento. Tente novamente.');
-        } finally {
-            setLoading(false);
-        }
     };
 
     if (items.length === 0 && !orderData) {
@@ -135,12 +80,18 @@ export default function CheckoutPage() {
 
                     <Divider sx={{ mb: 6 }} />
 
-                    <Box maxWidth={600} mx="auto">
-                        {paymentMethod === 'pix' ? (
-                            <PixPayment amount={totalPrice} orderId={orderData.orderId} />
-                        ) : (
-                            <BoletoPayment amount={totalPrice} orderId={orderData.orderId} />
-                        )}
+                    <Box textAlign="center">
+                        <Typography variant="h6" fontWeight={700} mb={2}>
+                            Seu pagamento está sendo processado.
+                        </Typography>
+                        <Button 
+                            variant="contained" 
+                            size="large" 
+                            onClick={() => router.push('/orders')}
+                            sx={{ borderRadius: 3, px: 4 }}
+                        >
+                            Ver Meus Pedidos
+                        </Button>
                     </Box>
                 </Paper>
             </Container>
@@ -179,28 +130,6 @@ export default function CheckoutPage() {
                         <PaymentSelector value={paymentMethod} onChange={setPaymentMethod} />
 
                         <Box sx={{ mt: 2 }}>
-                            {paymentMethod === 'card' && (
-                                <CreditCardPayment 
-                                    amount={totalPrice} 
-                                    onConfirm={(data) => setCardConfirmed(!!data)} 
-                                />
-                            )}
-                            {paymentMethod === 'pix' && (
-                                <Box sx={{ opacity: 0.9 }}>
-                                    <PixPayment amount={totalPrice} orderId="DEMO-ORDER" />
-                                    <Typography variant="caption" color="warning.main" sx={{ textAlign: 'center', display: 'block', mt: -2, mb: 2, fontWeight: 'bold' }}>
-                                        * Visualize o exemplo do QR Code acima. Ele será gerado oficialmente após finalizar o pedido.
-                                    </Typography>
-                                </Box>
-                            )}
-                            {paymentMethod === 'boleto' && (
-                                <Box sx={{ opacity: 0.9 }}>
-                                    <BoletoPayment amount={totalPrice} orderId="DEMO-ORDER" />
-                                    <Typography variant="caption" color="warning.main" sx={{ textAlign: 'center', display: 'block', mt: -2, mb: 2, fontWeight: 'bold' }}>
-                                        * Visualize o exemplo do boleto acima. Ele será gerado oficialmente após finalizar o pedido.
-                                    </Typography>
-                                </Box>
-                            )}
                             {paymentMethod === 'mercadopago' && (
                                 <MercadoPagoBrick 
                                     amount={totalPrice} 
@@ -250,39 +179,8 @@ export default function CheckoutPage() {
                             </Typography>
                         </Box>
 
-                        {paymentMethod !== 'mercadopago' && (
-                            <Button 
-                                variant="contained" 
-                                fullWidth 
-                                size="large" 
-                                onClick={handleCheckout}
-                                disabled={loading || (paymentMethod === 'card' && !cardConfirmed)}
-                                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Lock />}
-                                sx={{ 
-                                    borderRadius: 3, 
-                                    py: 2, 
-                                    fontWeight: 800,
-                                    fontSize: '1.1rem',
-                                    boxShadow: 4,
-                                    opacity: (paymentMethod === 'card' && !cardConfirmed) ? 0.7 : 1
-                                }}
-                            >
-                                {loading ? 'Processando...' : paymentMethod === 'card' ? 'Pagar com Cartão' : 'Finalizar Pedido'}
-                            </Button>
-                        )}
-                        
-                        {(paymentMethod === 'card' && !cardConfirmed) && (
-                            <Typography variant="caption" color="error" textAlign="center" display="block" mt={1} fontWeight="bold">
-                                * Por favor, confirme os dados do cartão acima antes de prosseguir.
-                            </Typography>
-                        )}
-                        
                         <Typography variant="caption" color="text.secondary" textAlign="center" display="block" mt={2}>
-                            {paymentMethod === 'card' 
-                                ? 'Pagamento seguro processado pelo Stripe' 
-                                : paymentMethod === 'mercadopago'
-                                ? 'Pagamento seguro processado pelo Mercado Pago'
-                                : 'Finalize o pedido para gerar os dados de pagamento'}
+                            Pagamento seguro processado pelo Mercado Pago
                         </Typography>
                     </Paper>
                 </Grid>
